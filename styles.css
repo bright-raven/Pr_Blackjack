@@ -1,0 +1,125 @@
+/*styles.css*/
+html, body {
+        height: 100%;
+      }
+      body {
+        background-color: #000000;
+        margin: 0;
+        font-family: Helvetica, sans-serif;
+        overflow: hidden;
+      }
+      a {
+        color: #ffffff;
+      }
+      #info {
+        position: absolute;
+        width: 100%;
+        color: #ffffff;
+        padding: 5px;
+        font-family: Helvetica, sans-serif;
+        font-size: 15px;
+        font-weight: bold;
+        text-align: center;
+        z-index: 1;
+      }
+      #menu {
+        position: absolute;
+        bottom: 20px;
+        width: 100%;
+        text-align: center;
+      }
+      #background_map{
+        width: 100%;
+        position: absolute;
+      }
+      .card {
+          display: block;
+	  background-color: rgba(255,255,255,1);
+          width: 120px;
+          height: 155px;
+          /*box-shadow: 0px 0px 12px rgba(0,255,255,0.5);*/
+          /*border: 1px solid rgba(127,255,255,0.25);*/
+          text-align: center;
+          cursor: default;
+          opacity: 1;
+          text-decoration: none;
+          z-index: 1;
+      }
+      .card:hover {
+        box-shadow: 0px 0px 12px rgba(0,255,255,0.75);
+        border: 1px solid rgba(127,255,255,0.75);
+        width: 240px;
+        height: 320px;
+        z-index: 2;
+      }
+
+      .card.face {
+      }
+      .card.back {
+      }
+      
+
+      /*
+      .card:hover .symbol{
+          display : none;
+      }
+      .card:hover .teamlogo{
+          display : block;
+          top: 50px;
+      }
+        }
+        .card .suit {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          font-size: 12px;
+          color: rgba(127,255,255,0.75);
+        }
+        .card .value {
+          position: absolute;
+          top: 14px;
+          left: 20px;
+          font-size: 18px;
+          color: rgba(127,255,255,0.75);
+        }
+        .card .symbol {
+          position: absolute;
+          top: 40px;
+          left: 0px;
+          right: 0px;
+          font-size: 56px;
+          font-weight: bold;
+          color: rgba(255,255,255,0.75);
+          display: block;
+          //text-shadow: 0 0 10px rgba(0,0,0,0.95);
+        }
+        .card .centerlogo {
+          display: none;
+          width: 80%;
+          position: absolute;
+          margin-left: auto;
+          margin-right: auto;
+          left: 0;
+          right: 0;
+        }
+	*/
+	
+      button {
+        color: rgba(255,255,255,0.75);
+        background: transparent;
+        outline: 1px solid rgba(255,255,255,0.75);
+        border: 0px;
+        padding: 5px 10px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: rgba(0,255,255,0.5);
+      }
+      button:active {
+        color: #000000;
+        background-color: rgba(0,255,255,0.75);
+      }
+      button:disabled {
+	  background-color: #CCCCCC;
+      }
+      

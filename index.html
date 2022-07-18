@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Blackjack</title>
+    <link href='styles.css' rel='stylesheet' />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  </head>
+  <body>
+    <script src="http://localhost:8080/libs/three.min.js"></script>
+    <script src="http://localhost:8080/libs/Tween.js"></script>
+    <script src="http://localhost:8080/libs/OrbitControls.js"></script>
+    <script src="http://localhost:8080/libs/CSS3DRenderer.js"></script>
+
+    <div id="container"></div>
+    <div id="info">Blackjack<a href="http://www.praeses.com" target="_blank" rel="noopener">@Praeses</a></div>
+    <div id="menu">
+      <button id="HIT">Hit</button>
+      <button id='STAND'>Stand</button>
+      <button id="DOUBLE-DOWN">Double-Down</button>
+      <button id="SPLIT">Split</button>
+    </div>
+
+    <script>
+
+      const cards = require('http://localhost:8080/assets/cards.json');
+
+      //this one has the top 4, followed by the remaining 21 in other rows
+      var top25 = [ // column x row
+
+        1, 1,
+        2, 1,
+        3, 1,
+        4, 1,
+        -.5, 3,
+        .5, 3,
+        1.5, 3,
+        2.5, 3,
+        3.5, 3,
+        4.5, 3,
+        5.5, 3,
+        -.5, 4,
+        .5, 4,
+        1.5, 4, 
+        2.5, 4,
+        3.5, 4,
+        4.5, 4,
+        5.5, 4,
+        -.5, 5,
+        .5, 5,
+        1.5, 5,
+        2.5, 5,
+        3.5, 5,
+        4.5, 5,
+        5.5, 5
+      ];
+
+      var conf={
+
+        aac:[],
+        acc:[],
+        big12:[],
+        big10:[],
+        confUSA:[],
+        indp:[],
+        midAM:[],
+        mnWEST:[],
+        pac12:[],
+        sec:[],
+        sunbelt:[]
+
+      };
+
+      var camera, scene, renderer;
+      var controls;
+      var objects = {};
+      var targets = { DEALER: [], PLAYER_1: [], PLAYER_2: [], PLAYER_3: [] };
+      init();
+      animate();
+
+      
+      function init() {
+        camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 10000 );
+        camera.position.z = 1500;
+        scene = new THREE.Scene();
+      
+        /*var background_map=document.createElement('img');
+        background_map.src='../images/usmap_states.png';
+        var obj= new THREE.CSS3DObject(background_map);
+        obj.position.x=0;
+        obj.position.y=0;
+        obj.position.z=-5;
+        scene.add(obj);*/
+      
+          // single_player
+
+	for (let crd of cards.values()) {
+	  var card=document.createElement('div');
+	  var card_img=document.createElement('img');
+	  card.appendChild(card_img);
+	  card.src="http://localhost:8080/assets/DVinfernoMegaeraTisifphoneAlecto_s.png";
+	  card.className = 'card';
+	  //need to add code here to make cards <a/> to https://en.wikipedia.org/wiki/Playing_card		     
+          //team.onclick="document.location='../periodic_table.html'"   
+          //team.addEventListener("onmouseover",hover(team,3));
+          var wlrecord = document.createElement( 'div' );
+          wlrecord.className = 'wlrecord';
+          wlrecord.textContent = teams[i+8];
+          wlrecord.style.color=teams[i+4];
+          team.appendChild( wlrecord );
+          var teamrank = document.createElement( 'div' );
+          if (teams[i+9]=='0') {
+            teamrankcounter+=1;
+            var teamranknumber=teamrankcounter+25;
+          }
+          else {
+            var teamranknumber=teams[i+9];
+          }
+          teamrank.className = 'teamrank';
+          teamrank.textContent = teamranknumber;
+          teamrank.style.color=teams[i+4];
+          team.appendChild(teamrank);
+          var teamlogo = document.createElement( 'img' );
+          teamlogo.className= 'teamlogo';
+          teamlogo.src=teams[i+10];
+          team.appendChild(teamlogo);
+          var teamname = document.createElement( 'div' );
+          teamname.className = 'teamname';
+          teamname.style.color=teams[i+4];
+          teamname.innerHTML = teams[ i + 1 ] + '<br>' + teams[ i + 2 ];
+          team.appendChild( teamname );
+          var object = new THREE.CSS3DObject( card );
+          //object.addEventListener("mouseenter",function () {this.position.z=500;render();});
+          //object.addEventListener("mouseout",function () {this.position.z=0;render();});
+          object.position.x = Math.random() * 4000 - 2000;
+          object.position.y = Math.random() * 4000 - 2000;
+          object.position.z = 0;
+          scene.add( object );
+          objects[teams[i]]= object ;
+          //
+          var object = new THREE.Object3D();
+          object.position.x = (table[(teamranknumber-1)*2] * 140) - 1450;
+          object.position.y = - ( table[(teamranknumber-1)*2+1] * 180) + 990;
+          targets.TABLE[teams[i]]=object;
+        }
+
+        //reset counter for top25 determination
+        teamrankcounter=0;
+
+        // top 25
+        for ( var i = 0, l = Object.keys(objects).length; i < (l*11); i +=11 ) {
+
+          if (teams[i+9]=='0') {
+            teamrankcounter+=1;
+            teamranknumber=teamrankcounter+25;
+          }
+          else {
+            teamranknumber=teams[i+9];
+          }
+          var object = new THREE.Object3D();
+          if (teamranknumber<=25) {
+            object.position.x = (top25[(teamranknumber-1)*2] * 140) - 470;
+            object.position.y = -(top25[(teamranknumber-1)*2+1] * 180)+530;
+            targets.TOP25[teams[i]]=object;
+          }
+          else {
+            object.position.x = Math.random() * 4000 -2000;
+            object.position.y = Math.random() * 4000 -2000;
+            object.position.z = 4000;
+            targets.TOP25[teams[i]]=object;
+          }
+        }
+        
+        // conference
+        for ( var i = 0, l = objects.length; i < l; i ++ ) {
+
+          var object = new THREE.Object3D();
+          spherical.set( 800, phi, theta );
+          object.position.setFromSpherical( spherical );
+          vector.copy( object.position ).multiplyScalar( 2 );
+          object.lookAt( vector );
+          targets.CONFERENCE.push( object );
+        }
+        
+        // matchups
+        var vector = new THREE.Vector3();
+        var cylindrical = new THREE.Cylindrical();
+        for ( var i = 0, l = objects.length; i < l; i ++ ) {
+          var theta = i * 0.175 + Math.PI;
+          var y = - ( i * 8 ) + 450;
+          var object = new THREE.Object3D();
+          cylindrical.set( 900, theta, y );
+          object.position.setFromCylindrical( cylindrical );
+          vector.x = object.position.x * 2;
+          vector.y = object.position.y;
+          vector.z = object.position.z * 2;
+          object.lookAt( vector );
+          targets.WEEKLY_MATCHUP.push( object );
+        }
+        
+        renderer = new THREE.CSS3DRenderer();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.domElement.style.position = 'absolute';
+        document.getElementById( 'container' ).appendChild( renderer.domElement );
+        //
+
+        controls = new THREE.OrbitControls( camera, renderer.domElement );
+        //controls.noRotate = true;
+        controls.rotateSpeed = 0.5;
+        controls.minDistance = 500;
+        controls.maxDistance = 6000;
+        controls.addEventListener( 'change', render );
+        
+        var button = document.getElementById( 'TABLE' );
+        button.addEventListener( 'click', function ( event ) {
+          transform( targets.TABLE, 2000 );
+        }, false );
+        var button = document.getElementById( 'TOP25' );
+        button.addEventListener( 'click', function ( event ) {
+          transform( targets.TOP25, 2000 );
+        }, false );
+        var button = document.getElementById( 'CONFERENCE' );
+        button.addEventListener( 'click', function ( event ) {
+          transform( targets.CONFERENCE, 2000 );
+        }, false );
+        var button = document.getElementById( 'WEEKLY_MATCHUP' );
+        button.addEventListener( 'click', function ( event ) {
+          transform( targets.WEEKLY_MATCHUP, 2000 );
+        }, false );
+        transform( targets.TABLE, 2000 );
+        //
+        window.addEventListener( 'resize', onWindowResize, false );
+      }
+      function transform( targets, duration ) {
+        TWEEN.removeAll();
+
+        for (var key in targets) {
+          var object = objects[key];
+          var target = targets[key];
+          new TWEEN.Tween( object.position )
+            .to( { x: target.position.x, y: target.position.y, z: target.position.z }, Math.random() * duration + duration )
+            .easing( TWEEN.Easing.Exponential.InOut )
+            .start();
+          new TWEEN.Tween( object.rotation )
+            .to( { x: target.rotation.x, y: target.rotation.y, z: target.rotation.z }, Math.random() * duration + duration )
+            .easing( TWEEN.Easing.Exponential.InOut )
+            .start();
+
+        }
+        new TWEEN.Tween( this )
+          .to( {}, duration * 2 )
+          .onUpdate( render )
+          .start();
+      }
+      function hover( obj,scalex ){
+        obj.scale.set( scalex, scalex, scalex );
+      }
+      function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        render();
+      }
+      function animate() {
+        requestAnimationFrame( animate );
+        TWEEN.update();
+        controls.update();
+      }
+      function render() {
+        renderer.render( scene, camera );
+      }
+    </script>
+  </body>
+</html>
