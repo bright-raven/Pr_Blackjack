@@ -3,6 +3,7 @@
 //provides the main game logic and marshals the other game entities
 
 
+
 var Game = {
 
     /* the shoe object holds undealt cards and keeps track of shuffle state.
