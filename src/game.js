@@ -2,19 +2,35 @@
 //
 //provides the main game logic and marshals the other game entities
 
+const root_dir = 'http://localhost:8080/';
 
 
 var Game = {
 
     /* the shoe object holds undealt cards and keeps track of shuffle state.
      all requests for cards to be dealt are directed at the shoe*/
-    shoe: [],
-    
-    // the discard object gives used cards a place to go physically before the shuffle*/
-    discard_pile: [],
+    shoe: require(root_dir+'/src/Shoe.js'),
 
+    //players are only removed from this list when their wallet goes to zero
+    //when this list reaches len==1 by pops or shifts
+    players: [],
+
+    add_players: function(number) {
+	
+	let Players = require(root_dir+'/src/player.js');
+	//add Dealer
+	this.players.push(new Players.Dealer());
+	this.players.push(new Players.Player('Frank'));	
+
+    //DEPRECATED: page will be set to the browser window script when Game is loaded by index.html
+    //this is set immediately to refer to the global object
+    page: globalThis,
+    
     // indicates that it is time to shuffle the shoe before the next hand when the marker card is reached during a round
     shuffle_flag: false,
+
+    //indicates that the game has been won by someone
+    game_over: false,
     
     play_hand: function(){
 	//defines the in-game logic
@@ -64,11 +80,5 @@ var Game = {
     }
     
 }
-
-while (true){Game.play_hand();}
-
-console.log("test");
-
-
 
 module.exports = Game
