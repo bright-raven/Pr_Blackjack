@@ -86,8 +86,7 @@ class Player {
 
     win(type){
     
-	//take their cards
-	this.hand=[];
+	this.discard();//take their cards
 	let winnings=this.current_bet;
 	//add their winnings based on win type
 	//win types are natural, score, dealer_bust
@@ -105,9 +104,7 @@ class Player {
     }
 
     lose(){
-	//loss can be either bust or based on score
-	//take their cards
-	this.hand=[];
+	this.discard();
 	let temp = this.current_bet
 	rm=this.transact(-this.current_bet);
 	if (rm) {this.lost=true;}
@@ -118,11 +115,16 @@ class Player {
     }
 
     tie(){
-	//take their cards
-	this.hand=[];
+	this.discard();
 	this.current_bet=10;
 	this.current_high_score=0;
     }
+
+    discard(){
+	for (const crd of this.hand){
+	    crd.discard();
+	}
+	this.hand=[]
 
     transact(amount){
 	//adds or removes money from player wallet

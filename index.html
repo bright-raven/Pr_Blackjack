@@ -34,15 +34,27 @@
       Game.table = this;
       var camera, scene, renderer, controls;
       var cards = Game.shoe.cards;
-      var target_list = ['DEALER_1', 'DEALER_2', 'PLAYER1_1', 'PLAYER1_2', 'SHOE', 'DISCARD', 'MARKER'];
+      //card_objs will give a simple index into the card CSS objects by their shoe ID
+      var card_objs = {}
+
+      //NB This is currently hard coded to only have 6 physical card slots. additional card behavior may be undetermined.
+      var target_list = ['DEALER_1', 'DEALER_2', 'DEALER_3', 'DEALER_4', 'DEALER_5', 'DEALER_6', 'PLAYER1_1', 'PLAYER1_2', 'PLAYER1_3', 'PLAYER1_4', 'PLAYER1_5', 'PLAYER1_6', 'SHOE', 'DISCARD', 'MARKER'];
       //targets is a dict of THREE.Object3D, keyed by the capital names above
       var targets = {};
 
       var single_player_layout = {// column x row (x then y coord)
 	  DEALER_1: [1,1],
 	  DEALER_2: [2,1],
+	  DEALER_3: [1,1.5],
+	  DEALER_4: [2,1.5],
+	  DEALER_5: [1,2],
+	  DEALER_6: [2,2],
 	  PLAYER1_1: [3,4],
 	  PLAYER1_2: [4,4],
+	  PLAYER1_3: [3,4.5],
+	  PLAYER1_4: [4,4.5],
+	  PLAYER1_5: [3,5],
+	  PLAYER1_6: [4,5],
 	  SHOE: [5,1],
 	  DISCARD: [6,1],
 	  MARKER: [5,0]
@@ -63,6 +75,7 @@
         scene = new THREE.Scene();
 
 	//keep for now in case we want to implement a felt pattern
+	  
         /*var background_map=document.createElement('img');
         background_map.src='../images/usmap_states.png';
         var obj= new THREE.CSS3DObject(background_map);
@@ -86,28 +99,43 @@
           //card.addEventListener("onmouseover",hover(card,3));
           var cardvalue = document.createElement( 'div' );
           cardvalue.className = 'cardface';
-          teamrank.textContent = teamranknumber;
-          teamrank.style.color=teams[i+4];
+          cardvalue.textContent = crd.value;
+          cardvalue.style.color=teams[i+4];
           card.appendChild(teamrank);
           var suitlogo = document.createElement( 'img' );
-          teamlogo.className= 'cardface';
-	  //.src should point to one of the four suit logos
-          suitlogo.src=teams[i+10];
-          card.appendChild(suitlogo);
+          suitlogo.className= 'cardface';
 
+	  switch(crd.suit) {
+	    case 'h':
+	      suitlogo.src=root_dir+"assets/heart.png";
+	      break;
+	    case 's':
+	      suitlogo.src=root_dir+"assets/spade.png";
+	      break;
+	    case 'd':
+	      suitlogo.src=root_dir+"assets/diamond.png";
+	      break;
+	    case 'c':
+	      suitlogo.src=root_dir+"assets/club.png";
+	      break;
+	    default:
+	      //nothing
+	  }
+	  
+          card.appendChild(suitlogo);
 	  var card_obj = new THREE.CSS3DObject( card );
-	  crd.doc_element = card_obj
+	  crd.doc_element = card_obj.element;
+
+	  //for now we will leave these here in case we want to further the animate cards on hovers.  
           //object.addEventListener("mouseenter",function () {this.position.z=500;render();});
           //object.addEventListener("mouseout",function () {this.position.z=0;render();});
 
 	  //give the cards starting exploded positions
-	  object.position.x = Math.random() * 4000 - 2000;
-          object.position.y = Math.random() * 4000 - 2000;
-          object.position.z = 0;
-          scene.add( object );
-          objects[teams[i]]= object ;
-          //
-          
+	  card_obj.position.x = Math.random() * 4000 - 2000;
+          card_obj.position.y = Math.random() * 4000 - 2000;
+          card_obj.position.z = 0;
+          scene.add( card_obj );
+          card_objs[crd.index]= card_obj;
         }
         
         renderer = new THREE.CSS3DRenderer();
@@ -130,22 +158,26 @@
         button.addEventListener( 'click', function ( event ) {
             handle_stand();
         }, false );
-        var button = document.getElementById( 'DOUBLE-DOWN' );
+
+	//NB CURRENTLY NOT IMPLEMENTED
+	  
+        /*var button = document.getElementById( 'DOUBLE-DOWN' );
 	button.style.visibility='hidden';
         button.addEventListener( 'click', function ( event ) {
-            handle_dd();
+            //handle_dd();
         }, false );
         var button = document.getElementById( 'SPLIT' );
 	button.style.visibility='hidden';
         button.addEventListener( 'click', function ( event ) {
-            handle_split();
-        }, false );
+            //handle_split();
+        }, false );*/
 	  
         transform( targets.TABLE, 2000 );
-        //
+	  
         window.addEventListener( 'resize', onWindowResize, false );
       }
 
+      //TODO
       //maybe we should respond to keypresses rather than button clicks? H for hit, S for stand?
       
       function handle_hit(){

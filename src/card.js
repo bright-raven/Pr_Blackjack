@@ -3,6 +3,7 @@ class Card {
 	this.table=globalThis;
 	this.value=value;
 	this.suit=suit;
+	//index is like a UUID for the card in the shoe
 	this.index=index;
 	this.shoe=shoe;
 	this.face_up=false;
@@ -22,6 +23,9 @@ class Card {
     returnToShoe(){
 	//shoe calls this upon shuffle
 	//add code to flip face down and table.transform() back to the shoe position
+	if (this.face_up) {
+	    this.flip();
+	}
 	this.face_up=false;
 	this.new_position='SHOE';
 	table.transform(this);

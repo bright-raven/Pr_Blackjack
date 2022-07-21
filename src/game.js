@@ -19,6 +19,7 @@ var Game = {
 	
 	let Players = require(root_dir+'/src/player.js');
 	//add Dealer
+	//Dealer should always be players[0], unless the player has beaten the house
 	this.players.push(new Players.Dealer());
 	//hardcoded to single player
 	this.players.push(new Players.Player());
@@ -34,6 +35,9 @@ var Game = {
     //indicates that the game has been won by someone
     game_over: false,
 
+    //error is meant to indicate that something has gone wrong in the game logic and the game has ended before a win condition
+    error: false,
+
     //this signals that the dealer/game is ready for a button press from the user. Otherwise it ignores the buttons
     ready_for_input: false,
 
@@ -48,10 +52,26 @@ var Game = {
 	//defines the per-round logic
 	//NB THIS IS CURRENTLY SINGLE PLAYER HARDCODED (IN PLACES)
 
+	//GUARD THE PLAY FUNCTION WITH A CHECK FOR THE DEALER
+	if (!this.players[0].is_dealer || this.players.length<2){ //dealer has been removed, or function has otherwise been improperly invoked
+	    //most likely, a win condition has simply been forgotten in the play logic
+	    this.game_over=true;
+	    this.error=true;
+	    console.log("IMPROPER PLAYER STRUCTURE FOR PLAY");
+	    return;
+
 	//players_remaining holds players who are still active in the hand
-	let players_remaining=this.players
+	let players_remaining=this.players;
 	    
-	if (this.shuffle_flag) {this.shoe.shuffle(); this.shoe.cut();}
+	if (this.shuffle_flag) {
+	    //return all cards to shoe
+	    for (const crd of this.shoe.cards.values()) {
+		crd.returnToShoe();
+	    }
+	    this.shoe.shuffle();
+	    this.shoe.cut();
+	    this.shuffle_flag=false;
+	}
 	//deal 1 card face up, CCW to players and dealer
 	this.shoe.deal(this.players[1]);
 	this.shoe.deal(this.players[0]);
@@ -62,7 +82,9 @@ var Game = {
 	//if dealer shows 10 J Q K A, peek dealer for natural, if not show, remain blind
 	if ([10,'J','Q','K','A'].includes(this.players[0].hand[0].value)){
 	    if (this.players[0].check_score()==21) {
-		//dealer natural check players. if player has, return bet, otherwise forfeit all bets and deal
+		//should flip the card over
+		this.players[0].hand[1].flip();
+		//dealer natural. check players. if player has, return bet, otherwise forfeit all bets and deal
 		if (this.players[1].check_score()==21){
 		    //its a draw
 		    for (const p of this.players) {
@@ -71,9 +93,9 @@ var Game = {
 		    }
 		    return;
 		} else {
+		    //HARDCODED
 		    this.players[0].win(this.players[1].lose());
-		    for (const p of this.players) {
-			players_remaining.splice(p.position, 1);
+		    players_remaining.splice(p.position, 1);
 		    }	
 		    if (players[1].lost){
 			//remove the player from the game
@@ -91,6 +113,7 @@ var Game = {
 	    //this means the dealer does not have a natural, check the players
 	    if (players[1].check_score()==21) { //player 1 has a natural and dealer does not
 		this.players[0].lose(this.players[1].win('natural'));
+		if (this.players[0].lost) {this.players.shift(); this.game_over=true; return;}
 		players_remaining.splice(this.players[1].position,1);
 	    }
 	}
@@ -108,10 +131,11 @@ var Game = {
 		    this.hit_flag=false;;
 		    if (this.players[1].check_score()>21){
 			//bust the player
+			this.ready_for_input=false;
 			this.players[0].win(this.players[1].lose());
 			players_remaining.splice(this.players[1].position,1);
-			if (this.players[1].lost) {this.players.pop(); this.game_over=true;}
-			return;
+			//this condition should NOT BE HERE for multiplayer
+			if (this.players[1].lost) {this.players.pop(); this.game_over=true; return;}
 		    } else {
 			//the player has not yet busted
 		    }
@@ -119,39 +143,45 @@ var Game = {
 	    }
 	    //the player has successfully stood, and we are now running the dealer algorithm
 	    //there would be another while loop here with the same condition if there were a player2
-	    while
-	    
-	   
-	    
+	    this.ready_for_input=false;
+	    var stood_score=this.players[1].check_score();
+	    while (this.players[0].check_score()<17) { //dealer hits if under 17  //IMPLEMENTATION DETAIL: Dealer does not hit on soft 17.
+		this.shoe.deal(this.players[0]);
+		if (this.players[0].check_score()>21) { //dealer busts, finish payouts for everyone
+		    //HARDCODED
+		    this.players[0].lose(this.players[1].win('dealer_bust'));
+		    players_remaining.splice(this.players[1].position,1);
+		    if (this.players[0].lost) {this.players.shift(); this.game_over=true; return;}
+		} else { //dealer has successfully hit. check if beaten player1 only
+		    let dealer_score=this.players[0].check_score();
+		    if (dealer_score>=stood_score) { //dealer has outdrawn or tied player
+			if (dealer_score>stood_score) { //player1 loses
+			    this.players[0].win(this.players[1].lose());
+			    players_remaining.splice(p.position, 1);
+			    //HARDCODED
+			    if (this.players[1].lost) {this.players.pop(); this.game_over=true; return;}
+			} else { //tie
+			    for (const p of players_remaining) {p.tie();}
+			    return;
+			}
+		    }
+		}
+	    }
+	    //if we've reached this point, the dealer has drawn upto/past 17 and the player has won
+	    //player1 win
+	    this.players[0].lose(this.players[1].win('score'));
+	    players_remaining.splice(this.players[1].position,1);
+	    if (this.players[0].lost) {this.players.shift(); this.game_over=true; return;}
+	    return;
 	} 
-	//
-	//once all players have played, dealer turns up 2nd card. if 17+, dealer stands, if 16- dealer hits until 17+.
-	//if dealer holds Ace, and counts 17+ with the 11, count as 11 and stand.
-	//
-	//IMPLEMENTATION DETAIL: Dealer does not hit on soft 17.
-	//
-	//remaining win/loss conditions applied:
-	//if player has busted, bet has been forfeit and they have been removed
-	//
-	//if dealer busts, dealer pays any standing player their bet.
-	//
-	//if dealer stands, any player with a lower score loses, higher score is paid wager, same score is a draw.
-	//
-	//when bets are settled, cards are collected face-up into discard.
-	//
-	//when marker has been reached in shoe, shuffle_flag has been set, and the shoe will be instructed
-	//to gather the cards, shuffle them, and perform a simulated cut at pos 65-75 from the bottom.
-	//
-	//play_hand is now repeated from the top.
-	//
-	//remove any players who have been flagged to remove
 
 	//global win check
 	if (this.players.length==1){
-	    //the win condition has been reached
+	    //a win condition has been reached
 	    this.game_over=true;
 	}
-	
+
+	//play now resumes from top if game has not ended
 
     },
 
