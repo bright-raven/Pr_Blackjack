@@ -53,9 +53,12 @@ html, body {
         z-index: 2;
       }
 
-      .card .face {
+      .cardface {
+	  visibility: visible;
       }
-      .card .back {
+      .cardback {
+	  visibility: visible;
+	  z-index: 2;
       }
       
 

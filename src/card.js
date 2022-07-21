@@ -7,6 +7,7 @@ class Card {
 	this.shoe=shoe;
 	this.face_up=false;
 	this.doc_element=doc_element;
+	this.image=null;
 	this.is_marker=is_marker;
 	//play_position is a string indicating the card's current position in play
 	this.play_position='SHOE';
@@ -44,7 +45,22 @@ class Card {
 	this.new_position=player.name+"_"+deal_index;
 	table.transform(this);
 	this.play_position=this.new_position;
-    }  
+    }
+
+    flip(){
+	//toggles the card state face/back
+	this.face_up=!this.face_up;
+	//change html element visibility accordingly
+	if (this.face_up) { //hide card back image
+
+	    this.image.style.visibility="hidden";
+	    
+	    this.doc_element.
+	} else { //show card back image (is child so should shadow card type divs)
+	    
+	    this.image.style.visibility="visible";
+	    
+	}
 }
 
 module.exports=Card;

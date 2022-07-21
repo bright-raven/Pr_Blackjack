@@ -76,20 +76,21 @@
 	  var card_img=document.createElement('img');
 	  card_img.src="http://localhost:8080/assets/DVinfernoMegaeraTisifphoneAlecto_s.png";
 	  card_img.width=120;
-	    card_img.height=155;
-	    card_img.className
+	  card_img.height=155;
+	  card_img.className="cardback";
 	  card.className = 'card';
 	  card.appendChild(card_img);
+	  crd.image=card_img;
 	  //need to add code here to make cards <a/> to https://en.wikipedia.org/wiki/Playing_card		     
           //card.onclick="document.location='../periodic_table.html'"   
           //card.addEventListener("onmouseover",hover(card,3));
           var cardvalue = document.createElement( 'div' );
-          cardvalue.className = 'card.value';
+          cardvalue.className = 'cardface';
           teamrank.textContent = teamranknumber;
           teamrank.style.color=teams[i+4];
           card.appendChild(teamrank);
           var suitlogo = document.createElement( 'img' );
-          teamlogo.className= 'card.logo';
+          teamlogo.className= 'cardface';
 	  //.src should point to one of the four suit logos
           suitlogo.src=teams[i+10];
           card.appendChild(suitlogo);

@@ -143,7 +143,7 @@ class Dealer extends Player {
 	    //special dealer lose deducts player's winnings
 	    this.hand=[];
 	    rm=this.transact(-amount);
-	    if (rm) {return true;}
+	    if (rm) {this.lost=true;}
 	};
 	this.win = function (amount){
 	    //but the house only ever wins the player bet amount

@@ -34,9 +34,14 @@ var Game = {
     //indicates that the game has been won by someone
     game_over: false,
 
-	//this signals that the dealer/game is ready for a button press from the user. Otherwise it ignores the buttons
+    //this signals that the dealer/game is ready for a button press from the user. Otherwise it ignores the buttons
     ready_for_input: false,
-	
+
+    //this signals that player1 has stood and allows game logic to continue
+    stand_flag: false,
+
+    //this signals that player1 has hit
+    hit_flag: false,
     
     play_hand: function(){
 
@@ -72,37 +77,58 @@ var Game = {
 		    }	
 		    if (players[1].lost){
 			//remove the player from the game
-			this.players.splice(players[1].position, 1); //remove player from players[]
+			this.players.splice(this.players[1].position, 1); //remove player from players[]
 			this.game_over=true;
 			return;
 		    }
 		    return;
 		}
-	    }
+  	    }
 	} else { //continue with play if no dealer natural
+
+	    //TODO: INSERT CODE FOR SPLITTING PAIRS, DOUBLING DOWN ON 9,10,11, INSURANCE
 	    
 	    //this means the dealer does not have a natural, check the players
 	    if (players[1].check_score()==21) { //player 1 has a natural and dealer does not
-		players[0].lose(players[1].win('natural'));
+		this.players[0].lose(this.players[1].win('natural'));
+		players_remaining.splice(this.players[1].position,1);
 	    }
-
-	    
-	    
 	}
+
+	if (players_remaining.length<=1) {
+	    //only dealer remains or no one remains
+	    if (players_remaining[0].lost) {this.game_over=true;}
+	    return;
+	} else { //game enters normal condition with players facing dealer
+	    this.ready_for_input=true;
+	    while (!this.stand_flag){
+		//do stuff to handle hits
+		if (this.hit_flag) {
+		    this.shoe.deal(this.players[1]);
+		    this.hit_flag=false;;
+		    if (this.players[1].check_score()>21){
+			//bust the player
+			this.players[0].win(this.players[1].lose());
+			players_remaining.splice(this.players[1].position,1);
+			if (this.players[1].lost) {this.players.pop(); this.game_over=true;}
+			return;
+		    } else {
+			//the player has not yet busted
+		    }
+		}
+	    }
+	    //the player has successfully stood, and we are now running the dealer algorithm
+	    //there would be another while loop here with the same condition if there were a player2
+	    while
 	    
-	//if not dealer natural, check players. if player natural, win 1.5 x bet and remove from lineup.
-	//continue with other players
-	//
-	//
-	//TODO: INSERT CODE FOR SPLITTING PAIRS, DOUBLING DOWN ON 9,10,11, INSURANCE
-	//
-	//
-	//first player hits or stays
-	//
-	//if stay, next player, if hit, hit and loop. if bust, next player and remove from round, and forfeit bet
+	   
+	    
+	} 
 	//
 	//once all players have played, dealer turns up 2nd card. if 17+, dealer stands, if 16- dealer hits until 17+.
 	//if dealer holds Ace, and counts 17+ with the 11, count as 11 and stand.
+	//
+	//IMPLEMENTATION DETAIL: Dealer does not hit on soft 17.
 	//
 	//remaining win/loss conditions applied:
 	//if player has busted, bet has been forfeit and they have been removed
@@ -136,13 +162,13 @@ var Game = {
 
     hit: function(){
 	if (this.ready_for_input){
-	    //deal to current player
+	    this.hit_flag=true;//deal to current player
 	}
     },
 
     stand: function(){
 	if (this.ready_for_input){
-	    //have current player stand and move on
+	    this.stand_flag=true; //have current player stand and move on
 	}
     }	    
     
