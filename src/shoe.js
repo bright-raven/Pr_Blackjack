@@ -9,7 +9,7 @@ const Card = require('./card.js')
 
 class Shoe {
     constructor(){
-	this.game=null;
+	this.game=globalThis.Game;
 	this.cards={};
 	//the cardstack represents the current shuffle by card id, whereas cards indexes the card objects themselves by id
 	//ints are pop() off of cardstack and used to determine the next card dealt
@@ -68,6 +68,11 @@ class Shoe {
 	/*this should never enter a state where there are no cards left
 	  because shuffle() should always happen at the marker*/
 	let dealt_card = this.cards[this.cardstack.shift()];
+	if (dealt_card.is_marker) {
+	    this.game.shuffle_flag=true;
+	    dealt_card.discard();
+	    dealt_card = this.cards[this.cardstack.shift()];
+	}
 	dealt_card.dealt(player);
     }
 }

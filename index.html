@@ -23,15 +23,19 @@
 
     <script>
 
+      /*this is the globalThis referred to as the 'table' in other modules. draw calls upon card movement
+	and W/L conditions are directed here to the transform() function
+
       /*code remaining inlined here deals primarily with the scene setup and animation, and has been left
 	separate from the game logic for that reason*/
 
       const root_dir = 'http://localhost:8080/';
       var Game = require(root_dir+'src/game.js');
-      Game.page = this;
+      Game.table = this;
       var camera, scene, renderer, controls;
       var cards = Game.shoe.cards;
       var target_list = ['DEALER_1', 'DEALER_2', 'PLAYER1_1', 'PLAYER1_2', 'SHOE', 'DISCARD', 'MARKER'];
+      //targets is a dict of THREE.Object3D, keyed by the capital names above
       var targets = {};
 
       var single_player_layout = {// column x row (x then y coord)
@@ -45,19 +49,12 @@
       };
       
       //set up tween targets for card animations
+      //single player
       for (const t of target_list) {
 	  var move_target = new THREE.Object3D();
-	  move_target.position.x = (140 * single_player_layout.t[0]-800);
-	  move_target.position.y = -(175 * single_player_layout.t[1])+650;
-	  targets.t=move_target;
-      }
-      
-      init();
-      animate();
-
-      //while the game hasn't been won, continue to play hands
-      while (!Game.game_over){
-	  Game.play_hand();
+	  move_target.position.x = (140 * single_player_layout[t][0]-800);
+	  move_target.position.y = -(175 * single_player_layout[t][1])+650;
+	  targets[t]=move_target;
       }
       
       function init() {
@@ -73,48 +70,32 @@
         obj.position.y=0;
         obj.position.z=-5;
         scene.add(obj);*/
-      
-          // single_player
-
+	  
 	for (let crd of cards.values()) {
 	  var card=document.createElement('div');
 	  var card_img=document.createElement('img');
 	  card_img.src="http://localhost:8080/assets/DVinfernoMegaeraTisifphoneAlecto_s.png";
 	  card_img.width=120;
-	  card_img.height=155;
+	    card_img.height=155;
+	    card_img.className
 	  card.className = 'card';
 	  card.appendChild(card_img);
 	  //need to add code here to make cards <a/> to https://en.wikipedia.org/wiki/Playing_card		     
-          //team.onclick="document.location='../periodic_table.html'"   
-          //team.addEventListener("onmouseover",hover(team,3));
-          var wlrecord = document.createElement( 'div' );
-          wlrecord.className = 'wlrecord';
-          wlrecord.textContent = teams[i+8];
-          wlrecord.style.color=teams[i+4];
-          team.appendChild( wlrecord );
-          var teamrank = document.createElement( 'div' );
-          if (teams[i+9]=='0') {
-            teamrankcounter+=1;
-            var teamranknumber=teamrankcounter+25;
-          }
-          else {
-            var teamranknumber=teams[i+9];
-          }
-          teamrank.className = 'teamrank';
+          //card.onclick="document.location='../periodic_table.html'"   
+          //card.addEventListener("onmouseover",hover(card,3));
+          var cardvalue = document.createElement( 'div' );
+          cardvalue.className = 'card.value';
           teamrank.textContent = teamranknumber;
           teamrank.style.color=teams[i+4];
-          team.appendChild(teamrank);
-          var teamlogo = document.createElement( 'img' );
-          teamlogo.className= 'teamlogo';
-          teamlogo.src=teams[i+10];
-          team.appendChild(teamlogo);
-          var teamname = document.createElement( 'div' );
-          teamname.className = 'teamname';
-          teamname.style.color=teams[i+4];
-          teamname.innerHTML = teams[ i + 1 ] + '<br>' + teams[ i + 2 ];
-          team.appendChild( teamname );
+          card.appendChild(teamrank);
+          var suitlogo = document.createElement( 'img' );
+          teamlogo.className= 'card.logo';
+	  //.src should point to one of the four suit logos
+          suitlogo.src=teams[i+10];
+          card.appendChild(suitlogo);
 
 	  var card_obj = new THREE.CSS3DObject( card );
+	  crd.doc_element = card_obj
           //object.addEventListener("mouseenter",function () {this.position.z=500;render();});
           //object.addEventListener("mouseout",function () {this.position.z=0;render();});
 
@@ -127,49 +108,6 @@
           //
           
         }
-
-        //reset counter for top25 determination
-        teamrankcounter=0;
-
-        // top 25
-        for ( var i = 0, l = Object.keys(objects).length; i < (l*11); i +=11 ) {
-
-          if (teams[i+9]=='0') {
-            teamrankcounter+=1;
-            teamranknumber=teamrankcounter+25;
-          }
-          else {
-            teamranknumber=teams[i+9];
-          }
-          var object = new THREE.Object3D();
-          if (teamranknumber<=25) {
-            object.position.x = (top25[(teamranknumber-1)*2] * 140) - 470;
-            object.position.y = -(top25[(teamranknumber-1)*2+1] * 180)+530;
-            targets.TOP25[teams[i]]=object;
-          }
-          else {
-            object.position.x = Math.random() * 4000 -2000;
-            object.position.y = Math.random() * 4000 -2000;
-            object.position.z = 4000;
-            targets.TOP25[teams[i]]=object;
-          }
-        }
-        
-        // matchups
-        var vector = new THREE.Vector3();
-        var cylindrical = new THREE.Cylindrical();
-        for ( var i = 0, l = objects.length; i < l; i ++ ) {
-          var theta = i * 0.175 + Math.PI;
-          var y = - ( i * 8 ) + 450;
-          var object = new THREE.Object3D();
-          cylindrical.set( 900, theta, y );
-          object.position.setFromCylindrical( cylindrical );
-          vector.x = object.position.x * 2;
-          vector.y = object.position.y;
-          vector.z = object.position.z * 2;
-          object.lookAt( vector );
-          targets.WEEKLY_MATCHUP.push( object );
-        }
         
         renderer = new THREE.CSS3DRenderer();
         renderer.setSize( window.innerWidth, window.innerHeight );
@@ -179,8 +117,8 @@
         controls = new THREE.OrbitControls( camera, renderer.domElement );
         //controls.noRotate = true;
         controls.rotateSpeed = 0.5;
-        controls.minDistance = 500;
-        controls.maxDistance = 6000;
+        controls.minDistance = 200;
+        controls.maxDistance = 2500;
         controls.addEventListener( 'change', render );
         
         var button = document.getElementById( 'HIT' );
@@ -192,10 +130,12 @@
             handle_stand();
         }, false );
         var button = document.getElementById( 'DOUBLE-DOWN' );
+	button.style.visibility='hidden';
         button.addEventListener( 'click', function ( event ) {
             handle_dd();
         }, false );
         var button = document.getElementById( 'SPLIT' );
+	button.style.visibility='hidden';
         button.addEventListener( 'click', function ( event ) {
             handle_split();
         }, false );
@@ -205,38 +145,48 @@
         window.addEventListener( 'resize', onWindowResize, false );
       }
 
+      //maybe we should respond to keypresses rather than button clicks? H for hit, S for stand?
+      
       function handle_hit(){
 	  //insert code to hit the current player with a card when button is pressed
+	  Game.hit();
       }
 
       function handle_stand(){
 	  //insert code to move to the next available player
+	  Game.stand();
       }
 
       function handle_dd(){
 	  //insert code to handle a double down
+	  //TODO
       }
 
       function handle_split(){
 	  //insert code to handle a split
+	  //TODO
+      }
+
+      function end_game(){
+	  //insert code to stop game, present banner with name, reset everything
+	  //this will be called by game when it detects a win
+	  //
+	  //insert banner movement code here
+	  //TODO
+	  window.close();
       }
       
-      function transform( targets, duration ) {
+      function transform(card, duration=1000 ) {
         TWEEN.removeAll();
-
-        for (var key in targets) {
-          var object = objects[key];
-          var target = targets[key];
-          new TWEEN.Tween( object.position )
-            .to( { x: target.position.x, y: target.position.y, z: target.position.z }, Math.random() * duration + duration )
-            .easing( TWEEN.Easing.Exponential.InOut )
-            .start();
-          new TWEEN.Tween( object.rotation )
-            .to( { x: target.rotation.x, y: target.rotation.y, z: target.rotation.z }, Math.random() * duration + duration )
-            .easing( TWEEN.Easing.Exponential.InOut )
-            .start();
-
-        }
+        
+        new TWEEN.Tween( card.doc_element.position )
+          .to( { x: targets[card.new_position].position.x, y: targets[card.new_position].position.y, z: targets[card.new_position].position.z }, Math.random() * duration + duration )
+          .easing( TWEEN.Easing.Exponential.InOut )
+          .start();
+        new TWEEN.Tween( card.doc_element.rotation )
+          .to( { x: targets[card.new_position].rotation.x, y: targets[card.new_position].rotation.y, z: targets[card.new_position].rotation.z }, Math.random() * duration + duration )
+          .easing( TWEEN.Easing.Exponential.InOut )
+          .start();
         new TWEEN.Tween( this )
           .to( {}, duration * 2 )
           .onUpdate( render )
@@ -263,6 +213,17 @@
       function render() {
         renderer.render( scene, camera );
       }
+
+      init();
+      animate();
+
+      //while the game hasn't been won, continue to play hands
+      while (!Game.game_over){
+	  Game.play_hand();
+      }
+
+      end_game();
+      
     </script>
   </body>
 </html>

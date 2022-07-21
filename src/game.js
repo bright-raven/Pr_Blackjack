@@ -20,37 +20,81 @@ var Game = {
 	let Players = require(root_dir+'/src/player.js');
 	//add Dealer
 	this.players.push(new Players.Dealer());
-	this.players.push(new Players.Player('Frank'));	
+	//hardcoded to single player
+	this.players.push(new Players.Player());
+    }
 
-    //DEPRECATED: page will be set to the browser window script when Game is loaded by index.html
+    //DEPRECATED: table will be set to the browser window script when Game is loaded in index.html
     //this is set immediately to refer to the global object
-    page: globalThis,
+    table: globalThis,
     
     // indicates that it is time to shuffle the shoe before the next hand when the marker card is reached during a round
     shuffle_flag: false,
 
     //indicates that the game has been won by someone
     game_over: false,
+
+	//this signals that the dealer/game is ready for a button press from the user. Otherwise it ignores the buttons
+    ready_for_input: false,
+	
     
     play_hand: function(){
-	//defines the in-game logic
-	//BEGIN GAME
-	//
-	//if (shuffle_flag) {shoe.shuffle(); shoe.cut()};
-	//
+
+	//defines the per-round logic
+	//NB THIS IS CURRENTLY SINGLE PLAYER HARDCODED (IN PLACES)
+
+	//players_remaining holds players who are still active in the hand
+	let players_remaining=this.players
+	    
+	if (this.shuffle_flag) {this.shoe.shuffle(); this.shoe.cut();}
 	//deal 1 card face up, CCW to players and dealer
-	//
+	this.shoe.deal(this.players[1]);
+	this.shoe.deal(this.players[0]);
 	//deal 1 card face up to players CCW, face down to dealer
-	//
+	this.shoe.deal(this.players[1]);
+	//this deal to the dealer should trigger the facedown condition
+	this.shoe.deal(this.players[0]);
 	//if dealer shows 10 J Q K A, peek dealer for natural, if not show, remain blind
-	//
-	//if dealer natural, check players. if player has, return bet, otherwise forfeit all bets and deal
-	//
+	if ([10,'J','Q','K','A'].includes(this.players[0].hand[0].value)){
+	    if (this.players[0].check_score()==21) {
+		//dealer natural check players. if player has, return bet, otherwise forfeit all bets and deal
+		if (this.players[1].check_score()==21){
+		    //its a draw
+		    for (const p of this.players) {
+			p.tie();
+			players_remaining.splice(p.position, 1);
+		    }
+		    return;
+		} else {
+		    this.players[0].win(this.players[1].lose());
+		    for (const p of this.players) {
+			players_remaining.splice(p.position, 1);
+		    }	
+		    if (players[1].lost){
+			//remove the player from the game
+			this.players.splice(players[1].position, 1); //remove player from players[]
+			this.game_over=true;
+			return;
+		    }
+		    return;
+		}
+	    }
+	} else { //continue with play if no dealer natural
+	    
+	    //this means the dealer does not have a natural, check the players
+	    if (players[1].check_score()==21) { //player 1 has a natural and dealer does not
+		players[0].lose(players[1].win('natural'));
+	    }
+
+	    
+	    
+	}
+	    
 	//if not dealer natural, check players. if player natural, win 1.5 x bet and remove from lineup.
 	//continue with other players
 	//
 	//
-	//NB: INSERT CODE FOR SPLITTING PAIRS, DOUBLING DOWN ON 9,10,11, INSURANCE
+	//TODO: INSERT CODE FOR SPLITTING PAIRS, DOUBLING DOWN ON 9,10,11, INSURANCE
 	//
 	//
 	//first player hits or stays
@@ -74,10 +118,33 @@ var Game = {
 	//
 	//play_hand is now repeated from the top.
 	//
-	//there should be a global win/loss condition and reset for the player/house when their wallet is empty
+	//remove any players who have been flagged to remove
+
+	//global win check
+	if (this.players.length==1){
+	    //the win condition has been reached
+	    this.game_over=true;
+	}
 	
 
-    }
+    },
+
+    //TODO for the following two functions, we would like to add an indicator so that it is apparent
+    //whose turn it is
+    //TODO
+    //we also need to make sure that ready_for_input is properly gating this game logic so proper game flow isnt interrupted.
+
+    hit: function(){
+	if (this.ready_for_input){
+	    //deal to current player
+	}
+    },
+
+    stand: function(){
+	if (this.ready_for_input){
+	    //have current player stand and move on
+	}
+    }	    
     
 }
 

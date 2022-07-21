@@ -53,9 +53,9 @@ html, body {
         z-index: 2;
       }
 
-      .card.face {
+      .card .face {
       }
-      .card.back {
+      .card .back {
       }
       
 
@@ -93,8 +93,7 @@ html, body {
           display: block;
           //text-shadow: 0 0 10px rgba(0,0,0,0.95);
         }
-        .card .centerlogo {
-          display: none;
+        .card .logo {
           width: 80%;
           position: absolute;
           margin-left: auto;
