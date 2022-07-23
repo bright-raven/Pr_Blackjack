@@ -2,41 +2,28 @@
 //
 //provides the main game logic and marshals the other game entities
 
-const root_dir = 'http://localhost:8080/';
-
-
 var Game = {
+
+    root_dir: 'http://localhost:8080/',
 
     /* the shoe object holds undealt cards and keeps track of shuffle state.
      all requests for cards to be dealt are directed at the shoe*/
-    shoe: require(root_dir+'/src/Shoe.js'),
+    shoe: new Shoe(),
 
     //players are only removed from this list when their wallet goes to zero
     //when this list reaches len==1 by pops or shifts
-    players: [],
-
-    add_players: function(number) {
-	
-	let Players = require(root_dir+'/src/player.js');
-	//add Dealer
-	//Dealer should always be players[0], unless the player has beaten the house
-	this.players.push(new Players.Dealer());
-	//hardcoded to single player
-	this.players.push(new Players.Player());
-    }
+    player: new Player(),
+    dealer: new Dealer(),
 
     //DEPRECATED: table will be set to the browser window script when Game is loaded in index.html
     //this is set immediately to refer to the global object
     table: globalThis,
     
     // indicates that it is time to shuffle the shoe before the next hand when the marker card is reached during a round
-    shuffle_flag: false,
+    shuffle_flag: true,
 
     //indicates that the game has been won by someone
     game_over: false,
-
-    //error is meant to indicate that something has gone wrong in the game logic and the game has ended before a win condition
-    error: false,
 
     //this signals that the dealer/game is ready for a button press from the user. Otherwise it ignores the buttons
     ready_for_input: false,
@@ -52,134 +39,154 @@ var Game = {
 	//defines the per-round logic
 	//NB THIS IS CURRENTLY SINGLE PLAYER HARDCODED (IN PLACES)
 
-	//GUARD THE PLAY FUNCTION WITH A CHECK FOR THE DEALER
-	if (!this.players[0].is_dealer || this.players.length<2){ //dealer has been removed, or function has otherwise been improperly invoked
-	    //most likely, a win condition has simply been forgotten in the play logic
+	//global win check
+	if (this.player==null || this.dealer==null){
+	    //a win condition has been reached
 	    this.game_over=true;
-	    this.error=true;
-	    console.log("IMPROPER PLAYER STRUCTURE FOR PLAY");
+	    console.log('win condition reached');
 	    return;
-
-	//players_remaining holds players who are still active in the hand
-	let players_remaining=this.players;
-	    
+	}
+  
 	if (this.shuffle_flag) {
 	    //return all cards to shoe
-	    for (const crd of this.shoe.cards.values()) {
+	    console.log('shuffling');
+	    for (const crd of Object.values(this.shoe.cards)) {
 		crd.returnToShoe();
 	    }
 	    this.shoe.shuffle();
-	    this.shoe.cut();
 	    this.shuffle_flag=false;
 	}
+	console.log('beginning deal');
+	
+	//EMPTY BOTH PLAYER HANDS SINCE WE SEEM TO BE LEAKING CARDS EVERY ROUND
+	this.player.current_high_score=0;
+	this.dealer.current_high_score=0;
+	//this.player.hand=[];
+	//this.dealer.hand=[];
+	
 	//deal 1 card face up, CCW to players and dealer
-	this.shoe.deal(this.players[1]);
-	this.shoe.deal(this.players[0]);
+	this.shoe.deal(this.player);
+	this.shoe.deal(this.dealer);
 	//deal 1 card face up to players CCW, face down to dealer
-	this.shoe.deal(this.players[1]);
+	this.shoe.deal(this.player);
 	//this deal to the dealer should trigger the facedown condition
-	this.shoe.deal(this.players[0]);
+	this.shoe.deal(this.dealer);
 	//if dealer shows 10 J Q K A, peek dealer for natural, if not show, remain blind
-	if ([10,'J','Q','K','A'].includes(this.players[0].hand[0].value)){
-	    if (this.players[0].check_score()==21) {
+	console.log('done with deal');
+	if ([10,'J','Q','K','A'].includes(cards[this.dealer.hand[0]].value)){
+	    if (this.dealer.check_score()==21) {
 		//should flip the card over
-		this.players[0].hand[1].flip();
+		cards[this.dealer.hand[1]].flip();
 		//dealer natural. check players. if player has, return bet, otherwise forfeit all bets and deal
-		if (this.players[1].check_score()==21){
+		if (this.player.check_score()==21){
 		    //its a draw
-		    for (const p of this.players) {
-			p.tie();
-			players_remaining.splice(p.position, 1);
-		    }
+		    
+		    player.tie();
+		    dealer.tie();		    
+		    console.log('both had naturals');
 		    return;
 		} else {
 		    //HARDCODED
-		    this.players[0].win(this.players[1].lose());
-		    players_remaining.splice(p.position, 1);
-		    }	
-		    if (players[1].lost){
+		    this.dealer.win(this.player.lose());	
+		    if (this.player.lost){
 			//remove the player from the game
-			this.players.splice(this.players[1].position, 1); //remove player from players[]
+			this.player=null;
 			this.game_over=true;
+			console.log('dealer natural, player lost');
 			return;
 		    }
+		    console.log('dealer natural, win');
 		    return;
 		}
-  	    }
-	} else { //continue with play if no dealer natural
-
+	    } else{
+		//dealer showed 10/11 card but didn't have natural
+		console.log('dealer showed but no natural');
+	    }
+  	} else {
+	    //continue with play if no dealer natural
+	    console.log('no dealer natural');
 	    //TODO: INSERT CODE FOR SPLITTING PAIRS, DOUBLING DOWN ON 9,10,11, INSURANCE
 	    
 	    //this means the dealer does not have a natural, check the players
-	    if (players[1].check_score()==21) { //player 1 has a natural and dealer does not
-		this.players[0].lose(this.players[1].win('natural'));
-		if (this.players[0].lost) {this.players.shift(); this.game_over=true; return;}
-		players_remaining.splice(this.players[1].position,1);
+	    if (this.player.check_score()==21 && this.player.hand.length==2) { //player 1 has a natural and dealer does not
+		this.dealer.lose(this.player.win('natural'));
+		if (this.dealer.lost) {this.dealer=null; this.game_over=true; console.log('player beat house with a natural'); return;}
+		console.log('player wins hand with natural');
+		return;
 	    }
-	}
-
-	if (players_remaining.length<=1) {
-	    //only dealer remains or no one remains
-	    if (players_remaining[0].lost) {this.game_over=true;}
-	    return;
-	} else { //game enters normal condition with players facing dealer
-	    this.ready_for_input=true;
-	    while (!this.stand_flag){
-		//do stuff to handle hits
-		if (this.hit_flag) {
-		    this.shoe.deal(this.players[1]);
-		    this.hit_flag=false;;
-		    if (this.players[1].check_score()>21){
-			//bust the player
-			this.ready_for_input=false;
-			this.players[0].win(this.players[1].lose());
-			players_remaining.splice(this.players[1].position,1);
-			//this condition should NOT BE HERE for multiplayer
-			if (this.players[1].lost) {this.players.pop(); this.game_over=true; return;}
-		    } else {
-			//the player has not yet busted
+	    if (this.player==null) {
+		//only dealer remains
+		this.game_over=true;
+		console.log('all players busted');
+		return;
+	    } else { //game enters normal condition with players facing dealer
+		this.ready_for_input=true;
+		while (!this.stand_flag && this.ready_for_input){
+		    //do stuff to handle hits
+		    if (this.hit_flag) {
+			console.log('player hits');
+			this.shoe.deal(this.player);
+			this.hit_flag=false;
+			if (this.player.check_score()>21){
+			    //bust the player
+			    this.ready_for_input=false;
+			    this.hit_flag=false;
+			    this.dealer.win(this.player.lose());
+			    //this condition should NOT BE HERE for multiplayer
+			    if (this.player.lost) {this.player=null; this.game_over=true; console.log('player lost'); return;}
+			    console.log('player busted');
+			    return;
+			} else {
+			    //the player has hit and not busted
+			    this.hit_flag=false;
+			}
 		    }
 		}
+		this.ready_for_input=false;
+		this.stand_flag=false;
+		this.hit_flag=false;
 	    }
 	    //the player has successfully stood, and we are now running the dealer algorithm
 	    //there would be another while loop here with the same condition if there were a player2
 	    this.ready_for_input=false;
-	    var stood_score=this.players[1].check_score();
-	    while (this.players[0].check_score()<17) { //dealer hits if under 17  //IMPLEMENTATION DETAIL: Dealer does not hit on soft 17.
-		this.shoe.deal(this.players[0]);
-		if (this.players[0].check_score()>21) { //dealer busts, finish payouts for everyone
+	    let stood_score=this.player.check_score();
+	    while (this.dealer.check_score()<17) { //dealer hits if under 17  //IMPLEMENTATION DETAIL: Dealer does not hit on soft 17.
+		this.shoe.deal(this.dealer);
+		if (this.dealer.check_score()>21) { //dealer busts, finish payouts for everyone
 		    //HARDCODED
-		    this.players[0].lose(this.players[1].win('dealer_bust'));
-		    players_remaining.splice(this.players[1].position,1);
-		    if (this.players[0].lost) {this.players.shift(); this.game_over=true; return;}
+		    this.dealer.lose(this.player.win('dealer_bust'));
+		    if (this.dealer.lost) {
+			this.dealer=null;
+			this.game_over=true;
+			console.log('dealer busted and lost');
+			return;
+		    }
 		} else { //dealer has successfully hit. check if beaten player1 only
-		    let dealer_score=this.players[0].check_score();
-		    if (dealer_score>=stood_score) { //dealer has outdrawn or tied player
+		    let dealer_score=this.dealer.check_score();
+		    if (dealer_score>=stood_score) { 
 			if (dealer_score>stood_score) { //player1 loses
-			    this.players[0].win(this.players[1].lose());
-			    players_remaining.splice(p.position, 1);
+			    this.dealer.win(this.player.lose());
 			    //HARDCODED
-			    if (this.players[1].lost) {this.players.pop(); this.game_over=true; return;}
+			    if (this.player.lost) {this.player=null; this.game_over=true; console.log('player lost game on score'); return;}
+			    console.log('player lost on score');
+			    return;
 			} else { //tie
-			    for (const p of players_remaining) {p.tie();}
+			    this.player.tie();
+			    this.dealer.tie();
+			    console.log('round ended in score tie')
 			    return;
 			}
 		    }
 		}
 	    }
-	    //if we've reached this point, the dealer has drawn upto/past 17 and the player has won
-	    //player1 win
-	    this.players[0].lose(this.players[1].win('score'));
-	    players_remaining.splice(this.players[1].position,1);
-	    if (this.players[0].lost) {this.players.shift(); this.game_over=true; return;}
-	    return;
+	console.log('dealer drawn to max');
+	//if we've reached this point, the dealer has drawn upto/past 17 and the player has won
+	//player1 win
+	this.dealer.lose(this.player.win('score'));
+	if (this.dealer.lost) {this.dealer=null; this.game_over=true; console.log('house lost on score'); return;}
+	console.log('player won on score');
+	return;
 	} 
-
-	//global win check
-	if (this.players.length==1){
-	    //a win condition has been reached
-	    this.game_over=true;
-	}
 
 	//play now resumes from top if game has not ended
 
@@ -204,4 +211,4 @@ var Game = {
     
 }
 
-module.exports = Game
+//module.exports = Game

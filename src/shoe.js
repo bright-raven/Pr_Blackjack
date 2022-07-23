@@ -1,11 +1,223 @@
 //shoe.js
 //the shoe deals, shuffles, and accepts discards
 
-const root_dir = 'http://localhost:8080/'
-const card_data = require(root_dir+'assets/cards.json');
-const Card = require('./card.js')
+var root_dir = 'http://localhost:8080/';
 
+var marker_data =  {
+    "suit": "x",
+    "value": "x"
+};
 
+var card_data = [
+  {
+    "suit": "h",
+    "value": 2
+  },
+  {
+    "suit": "h",
+    "value": 3
+  },
+  {
+    "suit": "h",
+    "value": 4
+  },
+  {
+    "suit": "h",
+    "value": 5
+  },
+  {
+    "suit": "h",
+    "value": 6
+  },
+  {
+    "suit": "h",
+    "value": 7
+  },
+  {
+    "suit": "h",
+    "value": 8
+  },
+  {
+    "suit": "h",
+    "value": 9
+  },
+  {
+    "suit": "h",
+    "value": 10
+  },
+  {
+    "suit": "h",
+    "value": "J"
+  },
+  {
+    "suit": "h",
+    "value": "Q"
+  },
+  {
+    "suit": "h",
+    "value": "K"
+  },
+  {
+    "suit": "h",
+    "value": "A"
+  },
+  {
+    "suit": "d",
+    "value": 2
+  },
+  {
+    "suit": "d",
+    "value": 3
+  },
+  {
+    "suit": "d",
+    "value": 4
+  },
+  {
+    "suit": "d",
+    "value": 5
+  },
+  {
+    "suit": "d",
+    "value": 6
+  },
+  {
+    "suit": "d",
+    "value": 7
+  },
+  {
+    "suit": "d",
+    "value": 8
+  },
+  {
+    "suit": "d",
+    "value": 9
+  },
+  {
+    "suit": "d",
+    "value": 10
+  },
+  {
+    "suit": "d",
+    "value": "J"
+  },
+  {
+    "suit": "d",
+    "value": "Q"
+  },
+  {
+    "suit": "d",
+    "value": "K"
+  },
+  {
+    "suit": "d",
+    "value": "A"
+  },
+  {
+    "suit": "c",
+    "value": 2
+  },
+  {
+    "suit": "c",
+    "value": 3
+  },
+  {
+    "suit": "c",
+    "value": 4
+  },
+  {
+    "suit": "c",
+    "value": 5
+  },
+  {
+    "suit": "c",
+    "value": 6
+  },
+  {
+    "suit": "c",
+    "value": 7
+  },
+  {
+    "suit": "c",
+    "value": 8
+  },
+  {
+    "suit": "c",
+    "value": 9
+  },
+  {
+    "suit": "c",
+    "value": 10
+  },
+  {
+    "suit": "c",
+    "value": "J"
+  },
+  {
+    "suit": "c",
+    "value": "Q"
+  },
+  {
+    "suit": "c",
+    "value": "K"
+  },
+  {
+    "suit": "c",
+    "value": "A"
+  },
+  {
+    "suit": "s",
+    "value": 2
+  },
+  {
+    "suit": "s",
+    "value": 3
+  },
+  {
+    "suit": "s",
+    "value": 4
+  },
+  {
+    "suit": "s",
+    "value": 5
+  },
+  {
+    "suit": "s",
+    "value": 6
+  },
+  {
+    "suit": "s",
+    "value": 7
+  },
+  {
+    "suit": "s",
+    "value": 8
+  },
+  {
+    "suit": "s",
+    "value": 9
+  },
+  {
+    "suit": "s",
+    "value": 10
+  },
+  {
+    "suit": "s",
+    "value": "J"
+  },
+  {
+    "suit": "s",
+    "value": "Q"
+  },
+  {
+    "suit": "s",
+    "value": "K"
+  },
+  {
+    "suit": "s",
+    "value": "A"
+  }
+];
 
 class Shoe {
     constructor(){
@@ -26,8 +238,8 @@ class Shoe {
     shuffle() {
 	
 	let new_stack=Array.from({length: 312}, (_, i) => i + 1)
-	min = Math.ceil(65);
-	max = Math.floor(75);
+	let min = Math.ceil(65);
+	let max = Math.floor(75);
 	let marker_index=312-(Math.floor(Math.random() * (max - min + 1)) + min);
 	
 	//perform in-place shuffle
@@ -39,42 +251,38 @@ class Shoe {
 	//insert item in arr at index, deleting 0 items
 	new_stack.splice(marker_index, 0, 0);
 	this.cardstack=new_stack;
+	this.discards=[];
 	
     }
     
     //this is currently hardcoded to 6 decks
     create_decks(number=6){
-	//thanks to https://helloacm.com/the-enumerate-function-in-javascript/ for the enumerate() snippet
-	//the strange loop variables are to account for the marker card being assigned the zero index at the end,
-	//no matter whether the card_data comes in order or not.
-	function *enumerate(array) {
-	    for (let i = 1; i < array.length+2; i += 1) {
-		yield [i, array[i]];
+	//create the marker
+	let marker_card=new Card(marker_data['value'],marker_data['suit'],0,this);
+	this.cards[marker_card.index]=marker_card;
+	this.cardstack.push(marker_card.index);
+	for (let j = 0; j < number; j++){
+	    
+	    for (let i = 0; i < card_data.length; i++) {
+		
+		let new_card=new Card(card_data[i]['value'],card_data[i]['suit'],(52*j)+(i+1),this);
+		//add new_card to stack and dict
+		this.cards[new_card.index]=new_card;
+		this.cardstack.push(new_card.index);
 	    }
 	}
-	for (crd of enumerate(Object.values(card_data))) {
-	    let new_card=new Card(crd[1].value,crd[1].suit,crd[0],this);
-	    if (new_card.value=='x') {
-		new_card.is_marker=true;
-		new_card.index=0;
-	    }
-	    //add new_card to stack and dict
-	    this.cards[new_card.index]=new_card;
-	    this.cardstack.push(new_card.index);
-	}
+	this.shuffle();
     }
 
-    deal(player) {
+    deal(plr) {
 	/*this should never enter a state where there are no cards left
 	  because shuffle() should always happen at the marker*/
-	let dealt_card = this.cards[this.cardstack.shift()];
-	if (dealt_card.is_marker) {
+	let drawn_card = this.cards[this.cardstack.shift()];
+	if (drawn_card.is_marker) {
 	    this.game.shuffle_flag=true;
-	    dealt_card.discard();
-	    dealt_card = this.cards[this.cardstack.shift()];
+	    drawn_card.discard();
+	    drawn_card = this.cards[this.cardstack.shift()];
 	}
-	dealt_card.dealt(player);
+	drawn_card.dealt(plr);
     }
 }
-
-module.exports=Shoe();

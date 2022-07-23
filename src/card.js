@@ -13,7 +13,7 @@ class Card {
 	//play_position is a string indicating the card's current position in play
 	this.play_position='SHOE';
 	//new_position is a string indicating where the card should be moved in the next transform() call
-	this.new_position='';
+	this.new_position='SHOE';
     }
 
     toString(){
@@ -28,7 +28,7 @@ class Card {
 	}
 	this.face_up=false;
 	this.new_position='SHOE';
-	table.transform(this);
+	this.table.transform(this,this.new_position,1000);
 	this.play_position='SHOE';
     }
 
@@ -36,18 +36,19 @@ class Card {
 	//add to the discard pile
 	this.shoe.discards.push(this.index);
 	this.new_position='DISCARD';
-	table.transform(this);
+	this.table.transform(this,this.new_position,1000);
 	this.play_position='DISCARD';
-	//tell the table to move the card to discard and render
     }
 
-    dealt(player){
-	let deal_index=player.hand.push(this);
-	if !(player.is_dealer && deal_index==2){
-	    this.face_up=true;
+    dealt(plyr){
+	//console.log(this.value+this.suit+' to '+ player.name);
+	let deal_index=plyr.hand.length+1;
+	plyr.hand.push(this.index);
+	if (plyr.is_dealer && deal_index==2){
+	    this.flip();
 	}
-	this.new_position=player.name+"_"+deal_index;
-	table.transform(this);
+	this.new_position=plyr.name+"_"+deal_index;
+	//this.table.transform(this,this.new_position,1000);
 	this.play_position=this.new_position;
     }
 
@@ -59,12 +60,10 @@ class Card {
 
 	    this.image.style.visibility="hidden";
 	    
-	    this.doc_element.
 	} else { //show card back image (is child so should shadow card type divs)
 	    
 	    this.image.style.visibility="visible";
 	    
 	}
+    }
 }
-
-module.exports=Card;

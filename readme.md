@@ -26,10 +26,13 @@ Then, do the following:
 
 ```
 $ cd /path/to/Pr_Blackjack
-$ http-server --cors
+$ http-server -c-1 --cors
 ```
+The -c-1 part disables caching if you need to run multiple times.
 
 Then, open Pr_Blackjack/index.html in your browser to play. Enjoy!
+
+If the gui doesn't appear to load, try clearing your browser cache.
 
 ##Attribution
 Three.js is used under the MIT License

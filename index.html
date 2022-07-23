@@ -7,30 +7,43 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
   </head>
   <body>
-    <script src="http://localhost:8080/libs/three.min.js"></script>
-    <script src="http://localhost:8080/libs/Tween.js"></script>
-    <script src="http://localhost:8080/libs/OrbitControls.js"></script>
-    <script src="http://localhost:8080/libs/CSS3DRenderer.js"></script>
+
+    <script src="./libs/three.js"></script>
+    <script src="./libs/Tween.js"></script>
+    <script src="./libs/OrbitControls.js"></script>
+    <script src="./libs/CSS3DRenderer.js"></script>
+    <script src="http://localhost:8080/src/card.js"></script>
+    <script src="http://localhost:8080/src/shoe.js"></script>
+    <script src="http://localhost:8080/src/player.js"></script> 
+    <script src="http://localhost:8080/src/game.js"></script> 
 
     <div id="container"></div>
     <div id="info">Blackjack<a href="http://www.praeses.com" target="_blank" rel="noopener">@Praeses</a></div>
     <div id="menu">
-      <button id="HIT">Hit</button>
-      <button id='STAND'>Stand</button>
-      <button id="DOUBLE-DOWN">Double-Down</button>
-      <button id="SPLIT">Split</button>
+      <button type='button' id="HIT">Hit</button>
+      <button type='button' id='STAND'>Stand</button>
+      <button type='button' id="DOUBLE-DOWN">Double-Down</button>
+      <button type='button' id="SPLIT">Split</button>
     </div>
 
     <script>
 
-      /*this is the globalThis referred to as the 'table' in other modules. draw calls upon card movement
-	and W/L conditions are directed here to the transform() function
+      //this is the globalThis referred to as the 'table' in other modules. draw calls upon card movement
+      //and W/L conditions are directed here to the transform() function
 
-      /*code remaining inlined here deals primarily with the scene setup and animation, and has been left
-	separate from the game logic for that reason*/
+      //code remaining inlined here deals primarily with the scene setup and animation, and has been left
+      //separate from the game logic for that reason
+      var root_dir = 'http://localhost:8080/';
+      
+      //import * as THREE from 'http://localhost:8080/libs/three.module.js'
+      //import * as TWEEN from 'http://localhost:8080/libs/Tween.js'
+      //import { OrbitControls } from 'http://localhost:8080/libs/OrbitControls.js'
+      //import { CSS3DRenderer } from 'http://localhost:8080/libs/CSS3DRenderer.js'
 
-      const root_dir = 'http://localhost:8080/';
-      var Game = require(root_dir+'src/game.js');
+      //this should be fixed by the above script import
+      //var Game = require(root_dir+'src/game.js');
+
+      //Game should be available from script import above
       Game.table = this;
       var camera, scene, renderer, controls;
       var cards = Game.shoe.cards;
@@ -39,10 +52,11 @@
 
       //NB This is currently hard coded to only have 6 physical card slots. additional card behavior may be undetermined.
       var target_list = ['DEALER_1', 'DEALER_2', 'DEALER_3', 'DEALER_4', 'DEALER_5', 'DEALER_6', 'PLAYER1_1', 'PLAYER1_2', 'PLAYER1_3', 'PLAYER1_4', 'PLAYER1_5', 'PLAYER1_6', 'SHOE', 'DISCARD', 'MARKER'];
-      //targets is a dict of THREE.Object3D, keyed by the capital names above
+      //targets is a dict of THREE.CSS3DObject, keyed by the capital names above
       var targets = {};
 
-      var single_player_layout = {// column x row (x then y coord)
+      var single_player_layout = {
+          // column x row (x then y coord)
 	  DEALER_1: [1,1],
 	  DEALER_2: [2,1],
 	  DEALER_3: [1,1.5],
@@ -63,15 +77,16 @@
       //set up tween targets for card animations
       //single player
       for (const t of target_list) {
-	  var move_target = new THREE.Object3D();
+	  var move_target = new THREE.CSS3DObject();
 	  move_target.position.x = (140 * single_player_layout[t][0]-800);
 	  move_target.position.y = -(175 * single_player_layout[t][1])+650;
+	  move_target.position.z = 0;
 	  targets[t]=move_target;
       }
       
       function init() {
         camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 10000 );
-        camera.position.z = 1500;
+        camera.position.z = 2500;
         scene = new THREE.Scene();
 
 	//keep for now in case we want to implement a felt pattern
@@ -84,7 +99,7 @@
         obj.position.z=-5;
         scene.add(obj);*/
 	  
-	for (let crd of cards.values()) {
+	for (let crd of Object.values(cards)) {
 	  var card=document.createElement('div');
 	  var card_img=document.createElement('img');
 	  card_img.src="http://localhost:8080/assets/DVinfernoMegaeraTisifphoneAlecto_s.png";
@@ -100,10 +115,10 @@
           var cardvalue = document.createElement( 'div' );
           cardvalue.className = 'cardface';
           cardvalue.textContent = crd.value;
-          cardvalue.style.color=teams[i+4];
-          card.appendChild(teamrank);
+          cardvalue.style.color='black';
+          card.appendChild(cardvalue);
           var suitlogo = document.createElement( 'img' );
-          suitlogo.className= 'cardface';
+          suitlogo.className='cardfacelogo';
 
 	  switch(crd.suit) {
 	    case 'h':
@@ -124,16 +139,16 @@
 	  
           card.appendChild(suitlogo);
 	  var card_obj = new THREE.CSS3DObject( card );
-	  crd.doc_element = card_obj.element;
+	  crd.doc_element = card_obj;
 
 	  //for now we will leave these here in case we want to further the animate cards on hovers.  
           //object.addEventListener("mouseenter",function () {this.position.z=500;render();});
           //object.addEventListener("mouseout",function () {this.position.z=0;render();});
 
 	  //give the cards starting exploded positions
-	  card_obj.position.x = Math.random() * 4000 - 2000;
-          card_obj.position.y = Math.random() * 4000 - 2000;
-          card_obj.position.z = 0;
+	  //card_obj.position.x = Math.random() * 4000 - 2000;
+          //card_obj.position.y = Math.random() * 4000 - 2000;
+          //card_obj.position.z = 0;
           scene.add( card_obj );
           card_objs[crd.index]= card_obj;
         }
@@ -144,7 +159,7 @@
         document.getElementById( 'container' ).appendChild( renderer.domElement );
 
         controls = new THREE.OrbitControls( camera, renderer.domElement );
-        //controls.noRotate = true;
+        controls.noRotate = true;
         controls.rotateSpeed = 0.5;
         controls.minDistance = 200;
         controls.maxDistance = 2500;
@@ -161,18 +176,20 @@
 
 	//NB CURRENTLY NOT IMPLEMENTED
 	  
-        /*var button = document.getElementById( 'DOUBLE-DOWN' );
-	button.style.visibility='hidden';
-        button.addEventListener( 'click', function ( event ) {
+        //var button = document.getElementById( 'DOUBLE-DOWN' );
+	//button.style.visibility='hidden';
+        //button.addEventListener( 'click', function ( event ) {
             //handle_dd();
-        }, false );
-        var button = document.getElementById( 'SPLIT' );
-	button.style.visibility='hidden';
-        button.addEventListener( 'click', function ( event ) {
+        //}, false );
+        //var button = document.getElementById( 'SPLIT' );
+	//button.style.visibility='hidden';
+        //button.addEventListener( 'click', function ( event ) {
             //handle_split();
-        }, false );*/
-	  
-        transform( targets.TABLE, 2000 );
+        //}, false );
+
+	for (const c of Object.values(cards)){
+	  c.returnToShoe();
+	}
 	  
         window.addEventListener( 'resize', onWindowResize, false );
       }
@@ -182,12 +199,12 @@
       
       function handle_hit(){
 	  //insert code to hit the current player with a card when button is pressed
-	  Game.hit();
+	  Game.hit_flag=true;
       }
 
       function handle_stand(){
 	  //insert code to move to the next available player
-	  Game.stand();
+	  Game.stand_flag=true;
       }
 
       function handle_dd(){
@@ -209,25 +226,28 @@
 	  window.close();
       }
       
-      function transform(card, duration=1000 ) {
-        TWEEN.removeAll();
+      function transform(card, target_name,duration=1000 ) {
+	  TWEEN.removeAll();
+
+	  let temp_targ=targets[target_name].position.x;
         
-        new TWEEN.Tween( card.doc_element.position )
-          .to( { x: targets[card.new_position].position.x, y: targets[card.new_position].position.y, z: targets[card.new_position].position.z }, Math.random() * duration + duration )
+          new TWEEN.Tween( card.doc_element.position )
+	  .to( { x: targets[target_name].position.x, y: targets[target_name].position.y, z: targets[target_name].position.z }, Math.random() * duration + duration )
           .easing( TWEEN.Easing.Exponential.InOut )
           .start();
-        new TWEEN.Tween( card.doc_element.rotation )
+          new TWEEN.Tween( card.doc_element.rotation )
           .to( { x: targets[card.new_position].rotation.x, y: targets[card.new_position].rotation.y, z: targets[card.new_position].rotation.z }, Math.random() * duration + duration )
           .easing( TWEEN.Easing.Exponential.InOut )
           .start();
-        new TWEEN.Tween( this )
+          new TWEEN.Tween( this )
           .to( {}, duration * 2 )
           .onUpdate( render )
           .start();
       }
       
       function hover( obj,scalex ){
-        obj.scale.set( scalex, scalex, scalex );
+	//just leave this out for now
+	//obj.scale.set( scalex, scalex, scalex )
       }
       
       function onWindowResize() {

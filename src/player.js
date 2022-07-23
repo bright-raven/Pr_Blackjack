@@ -15,22 +15,22 @@ class Player {
     //check_score should be queried by the game whenever a card is dealt
     //if it returns a number over 21, bust the player and remove from round
     check_score(){
-	var ace_bin=0;
-	var ace_scores=[];
-	var num_bin=0;
-	var possible_scores=[];
-	var best_score=0;
+	let ace_bin=0;
+	let ace_scores=[];
+	let num_bin=0;
+	let possible_scores=[];
+	let best_score=0;
 	//check for ace in hand, otherwise add cards
-	for (const card of this.hand) {
-	    if (card.value=='A') {
+	for (let id of this.hand) {
+	    if (cards[id].value=='A') {
 		//insert code to deal with checking if A is 1 or 11;
 		ace_bin+=1;
 	    } else {
 		//append value to num_bin
-		if (['K','Q','J'].includes(card.value)){
+		if (['K','Q','J'].includes(cards[id].value)){
 		    num_bin+=10;
 		} else{
-		    num_bin+=card.value;
+		    num_bin+=cards[id].value;
 		}
 	    }
 	}
@@ -65,7 +65,7 @@ class Player {
 	case 9:
 	    ace_scores=[9,19];
 	    break;
-	case 10:
+ 	case 10:
 	    ace_scores=[10,20];
 	    break;
 	case 11:
@@ -74,7 +74,7 @@ class Player {
 	default:
 	    //that was fun wasn't it?
 	}
-	var possible_scores = ace_scores.map(x => x + num_bin);
+	possible_scores = ace_scores.map(x => x + num_bin);
 	if (possible_scores[1]>21){
 	    best_score=possible_scores[0];
 	} else{
@@ -105,8 +105,8 @@ class Player {
 
     lose(){
 	this.discard();
-	let temp = this.current_bet
-	rm=this.transact(-this.current_bet);
+	let temp = this.current_bet;
+	let rm=this.transact(-this.current_bet);
 	if (rm) {this.lost=true;}
 	this.current_bet=10;
 	this.current_high_score=0;
@@ -121,10 +121,11 @@ class Player {
     }
 
     discard(){
-	for (const crd of this.hand){
-	    crd.discard();
+	for (let crd_id of this.hand){
+	    cards[crd_id].discard();
 	}
-	this.hand=[]
+	this.hand=[];
+    }
 
     transact(amount){
 	//adds or removes money from player wallet
@@ -134,6 +135,7 @@ class Player {
 	if (this.wallet<=0){remove_flag=true;}
 	return remove_flag;
     }
+}
 
 class Dealer extends Player {
     constructor(){
@@ -143,16 +145,16 @@ class Dealer extends Player {
 	this.position=0;
 	this.lose = function (amount){
 	    //special dealer lose deducts player's winnings
-	    this.hand=[];
-	    rm=this.transact(-amount);
+	    this.discard();
+	    this.current_high_score=0;
+	    let rm=this.transact(-amount);
 	    if (rm) {this.lost=true;}
 	};
 	this.win = function (amount){
 	    //but the house only ever wins the player bet amount
-	    this.hand=[];
+	    this.discard();
+	    this.current_high_score=0;
 	    this.transact(amount);
 	};
     }
 }
-
-module.exports = { Player, Dealer }
