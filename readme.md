@@ -7,6 +7,8 @@
 * [Attribution] (#attribution)
 
 ## General info
+! My sincerest apologies, I did my best to get this functional, but it appears I bit off more than I could chew in a week. !
+
 This is a simple single player web-based version of Blackjack, with a 3d twist.
 	
 ## Technologies
