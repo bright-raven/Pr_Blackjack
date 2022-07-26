@@ -34,22 +34,32 @@ class Card {
 
     discard(){
 	//add to the discard pile
+	if (!this.face_up){
+	    this.flip();
+	}
+	this.face_up=true;
 	this.shoe.discards.push(this.index);
 	this.new_position='DISCARD';
-	this.table.transform(this,this.new_position,1000);
 	this.play_position='DISCARD';
+	this.table.transform(this,this.new_position,1000);
     }
 
     dealt(plyr){
 	//console.log(this.value+this.suit+' to '+ player.name);
 	let deal_index=plyr.hand.length+1;
 	plyr.hand.push(this.index);
-	if (plyr.is_dealer && deal_index==2){
+	if (plyr.is_dealer){
+	    if (deal_index==1){
+		this.flip();
+		this.face_up=true;
+	    }
+	} else if (!plyr.is_dealer) {
 	    this.flip();
+	    this.face_up=true;
 	}
 	this.new_position=plyr.name+"_"+deal_index;
-	this.table.transform(this,this.new_position,1000);
 	this.play_position=this.new_position;
+	this.table.transform(this,this.new_position,1000);
     }
 
     flip(){
