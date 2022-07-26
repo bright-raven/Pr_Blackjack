@@ -231,7 +231,6 @@ class Shoe {
 	//insert logic to fill cards{} from json and do an initial shuffle and cut.
 	//i.e. prepare for the game object to request dealt cards
 	this.create_decks();
-	this.shuffle();
 	
     }
 

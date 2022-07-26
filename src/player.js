@@ -36,7 +36,7 @@ class Player {
 	}
 	switch(ace_bin) {
 	case 0:
-	    ace_scores=[0];
+	    ace_scores=[0,0];
 	    break;
 	case 1:
 	    ace_scores=[1,11];
@@ -71,8 +71,6 @@ class Player {
 	case 11:
 	    ace_scores=[11,21];
 	    break;
-	default:
-	    //that was fun wasn't it?
 	}
 	possible_scores = ace_scores.map(x => x + num_bin);
 	if (possible_scores[1]>21){
@@ -135,6 +133,7 @@ class Player {
 	if (this.wallet<=0){remove_flag=true;}
 	return remove_flag;
     }
+
 }
 
 class Dealer extends Player {

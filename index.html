@@ -21,7 +21,7 @@
     <div id="info">Blackjack<a href="http://www.praeses.com" target="_blank" rel="noopener">@Praeses</a></div>
     <div id="menu">
       <button type='button' id="HIT">Hit</button>
-      <button type='button' id='STAND'>Stand</button>
+      <button type='button' id="STAND">Stand</button>
       <button type='button' id="DOUBLE-DOWN">Double-Down</button>
       <button type='button' id="SPLIT">Split</button>
     </div>
@@ -33,22 +33,13 @@
 
       //code remaining inlined here deals primarily with the scene setup and animation, and has been left
       //separate from the game logic for that reason
-      var root_dir = 'http://localhost:8080/';
       
-      //import * as THREE from 'http://localhost:8080/libs/three.module.js'
-      //import * as TWEEN from 'http://localhost:8080/libs/Tween.js'
-      //import { OrbitControls } from 'http://localhost:8080/libs/OrbitControls.js'
-      //import { CSS3DRenderer } from 'http://localhost:8080/libs/CSS3DRenderer.js'
-
-      //this should be fixed by the above script import
-      //var Game = require(root_dir+'src/game.js');
-
-      //Game should be available from script import above
+      var root_dir = 'http://localhost:8080/';
       Game.table = this;
       var camera, scene, renderer, controls;
       var cards = Game.shoe.cards;
       //card_objs will give a simple index into the card CSS objects by their shoe ID
-      var card_objs = {}
+      var card_objs = {};
 
       //NB This is currently hard coded to only have 6 physical card slots. additional card behavior may be undetermined.
       var target_list = ['DEALER_1', 'DEALER_2', 'DEALER_3', 'DEALER_4', 'DEALER_5', 'DEALER_6', 'PLAYER1_1', 'PLAYER1_2', 'PLAYER1_3', 'PLAYER1_4', 'PLAYER1_5', 'PLAYER1_6', 'SHOE', 'DISCARD', 'MARKER'];
@@ -133,8 +124,6 @@
 	    case 'c':
 	      suitlogo.src=root_dir+"assets/club.png";
 	      break;
-	    default:
-	      //nothing
 	  }
 	  
           card.appendChild(suitlogo);
@@ -167,11 +156,11 @@
         
         var button = document.getElementById( 'HIT' );
         button.addEventListener( 'click', function ( event ) {
-            handle_hit();
+            handle_hit(event);
           }, false );
         var button = document.getElementById( 'STAND' );
         button.addEventListener( 'click', function ( event ) {
-            handle_stand();
+            handle_stand(event);
         }, false );
 
 	//NB CURRENTLY NOT IMPLEMENTED
@@ -198,13 +187,11 @@
       //maybe we should respond to keypresses rather than button clicks? H for hit, S for stand?
       
       function handle_hit(){
-	  //insert code to hit the current player with a card when button is pressed
-	  Game.hit_flag=true;
+          Game.play_hand('HIT');
       }
 
       function handle_stand(){
-	  //insert code to move to the next available player
-	  Game.stand_flag=true;
+          Game.play_hand('STAND');
       }
 
       function handle_dd(){
@@ -217,12 +204,13 @@
 	  //TODO
       }
 
-      function end_game(){
+      function end_game(winner){
 	  //insert code to stop game, present banner with name, reset everything
 	  //this will be called by game when it detects a win
 	  //
 	  //insert banner movement code here
-	  //TODO
+          //TODO
+          alert('GAME OVER: '+winner.name+' WON');
 	  window.close();
       }
       
@@ -268,14 +256,8 @@
       }
 
       init();
-      animate();
-
-      //while the game hasn't been won, continue to play hands
-      while (!Game.game_over){
-	  Game.play_hand();
-      }
-
-      end_game();
+      animate();		    
+      Game.play_hand();
       
     </script>
   </body>
