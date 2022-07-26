@@ -144,6 +144,8 @@ var Game = {
 
 		console.log('player hits');
 		this.shoe.deal(this.player);
+		this.print_hand(this.player);
+		this.print_hand(this.dealer);
 		if (this.player.check_score()>21){
 		    //bust the player
 		    this.dealer.win(this.player.lose());
@@ -162,9 +164,14 @@ var Game = {
 
 		//the player has successfully stood, and we are now running the dealer algorithm
 		//there would be another while loop here with the same condition if there were a player2
+		console.log('player stands');
+		this.print_hand(this.player);
+		this.print_hand(this.dealer);
 		let stood_score=this.player.check_score();
 		while (this.dealer.check_score()<stood_score && this.dealer.check_score()<17) { //dealer hits if under 17  //IMPLEMENTATION DETAIL: Dealer does not hit on soft 17.
 		    this.shoe.deal(this.dealer);
+		    this.print_hand(this.player);
+		    this.print_hand(this.dealer);
 		    if (this.dealer.check_score()>21) { //dealer busts, finish payouts for everyone
 			//HARDCODED
 			this.dealer.lose(this.player.win('dealer_bust'));
@@ -200,6 +207,8 @@ var Game = {
 		//if we've reached this point, the dealer has drawn upto/past 17 and the player has won
 		//player1 win
 		console.log('dealer drawn to max');
+		this.print_hand(this.player);
+		this.print_hand(this.dealer);
 		this.dealer.lose(this.player.win('score'));
 		if (this.dealer.lost) {this.dealer=null; this.game_over=true; console.log('house lost on score'); return;}
 		console.log('player won on score');
