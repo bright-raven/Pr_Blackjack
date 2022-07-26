@@ -53,7 +53,7 @@ var Game = {
 		this.shuffle_flag=false;
 	    }
 	    console.log('beginning deal');
-	    console.log(this.shoe.cardstack);
+	    //console.log(this.shoe.cardstack);
 	
 	    this.player.current_high_score=0;
 	    this.dealer.current_high_score=0;
@@ -68,7 +68,7 @@ var Game = {
 	    //this deal to the dealer should trigger the facedown condition
 	    this.shoe.deal(this.dealer);
 	    this.print_hand(this.player);
-	    this.print_hand(this.dealer);
+	    //this.print_hand(this.dealer);
 	    //if dealer shows 10 J Q K A, peek dealer for natural, if not show, remain blind
 	    console.log('done with deal');
 	    if ([10,'J','Q','K','A'].includes(cards[this.dealer.hand[0]].value)){
@@ -145,7 +145,7 @@ var Game = {
 		console.log('player hits');
 		this.shoe.deal(this.player);
 		this.print_hand(this.player);
-		this.print_hand(this.dealer);
+		//this.print_hand(this.dealer);
 		if (this.player.check_score()>21){
 		    //bust the player
 		    this.dealer.win(this.player.lose());
@@ -166,12 +166,12 @@ var Game = {
 		//there would be another while loop here with the same condition if there were a player2
 		console.log('player stands');
 		this.print_hand(this.player);
-		this.print_hand(this.dealer);
+		//this.print_hand(this.dealer);
 		let stood_score=this.player.check_score();
 		while (this.dealer.check_score()<stood_score && this.dealer.check_score()<17) { //dealer hits if under 17  //IMPLEMENTATION DETAIL: Dealer does not hit on soft 17.
 		    this.shoe.deal(this.dealer);
 		    this.print_hand(this.player);
-		    this.print_hand(this.dealer);
+		    //this.print_hand(this.dealer);
 		    if (this.dealer.check_score()>21) { //dealer busts, finish payouts for everyone
 			//HARDCODED
 			this.dealer.lose(this.player.win('dealer_bust'));
@@ -208,7 +208,7 @@ var Game = {
 		//player1 win
 		console.log('dealer drawn to max');
 		this.print_hand(this.player);
-		this.print_hand(this.dealer);
+		//this.print_hand(this.dealer);
 		this.dealer.lose(this.player.win('score'));
 		if (this.dealer.lost) {this.dealer=null; this.game_over=true; console.log('house lost on score'); return;}
 		console.log('player won on score');
