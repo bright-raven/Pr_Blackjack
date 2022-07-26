@@ -254,7 +254,6 @@ class Shoe {
 	
     }
     
-    //this is currently hardcoded to 6 decks
     create_decks(number=6){
 	//create the marker
 	let marker_card=new Card(marker_data['value'],marker_data['suit'],0,this);

@@ -48,7 +48,7 @@ class Card {
 	    this.flip();
 	}
 	this.new_position=plyr.name+"_"+deal_index;
-	//this.table.transform(this,this.new_position,1000);
+	this.table.transform(this,this.new_position,1000);
 	this.play_position=this.new_position;
     }
 

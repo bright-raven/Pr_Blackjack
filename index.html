@@ -94,8 +94,6 @@
 	  var card=document.createElement('div');
 	  var card_img=document.createElement('img');
 	  card_img.src="http://localhost:8080/assets/DVinfernoMegaeraTisifphoneAlecto_s.png";
-	  card_img.width=120;
-	  card_img.height=155;
 	  card_img.className="cardback";
 	  card.className = 'card';
 	  card.appendChild(card_img);
@@ -164,19 +162,14 @@
         button.addEventListener( 'click', function ( event ) {
             handle_stand(event);
         }, false );
-
-	//NB CURRENTLY NOT IMPLEMENTED
-	  
-        //var button = document.getElementById( 'DOUBLE-DOWN' );
-	//button.style.visibility='hidden';
-        //button.addEventListener( 'click', function ( event ) {
-            //handle_dd();
-        //}, false );
-        //var button = document.getElementById( 'SPLIT' );
-	//button.style.visibility='hidden';
-        //button.addEventListener( 'click', function ( event ) {
-            //handle_split();
-        //}, false );
+	var button = document.getElementById( 'DOUBLE-DOWN' );
+        button.addEventListener( 'click', function ( event ) {
+            alert("SORRY!");
+        }, false );
+	var button = document.getElementById( 'SPLIT' );
+        button.addEventListener( 'click', function ( event ) {
+            alert("SORRY!");
+        }, false );
 
 	for (const c of Object.values(cards)){
 	  c.returnToShoe();
