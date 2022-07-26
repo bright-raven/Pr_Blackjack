@@ -7,6 +7,7 @@
 * [Attribution] (#attribution)
 
 ## General info
+! As of right now, the game should be playable in the console !
 ! My sincerest apologies, I did my best to get this functional, but it appears I bit off more than I could chew in a week. !
 
 This is a simple single player web-based version of Blackjack, with a 3d twist.
