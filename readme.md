@@ -35,6 +35,8 @@ The -c-1 part disables caching if you need to run multiple times.
 
 Then, open Pr_Blackjack/index.html in your browser to play. Enjoy!
 
+You can deal after a round by pressing either the hit or stand button.
+
 If the gui doesn't appear to load, try clearing your browser cache.
 
 ##Attribution
