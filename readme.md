@@ -7,9 +7,6 @@
 * [Attribution] (#attribution)
 
 ## General info
-! As of right now, the game should be playable in the console !
-! My sincerest apologies, I did my best to get this functional, but it appears I bit off more than I could chew in a week. !
-
 This is a simple single player web-based version of Blackjack, with a 3d twist.
 	
 ## Technologies
@@ -36,8 +33,7 @@ The -c-1 part disables caching if you need to run multiple times.
 Then, open Pr_Blackjack/index.html in your browser to play. Enjoy!
 
 You can deal after a round by pressing either the hit or stand button.
-
-If the gui doesn't appear to load, try clearing your browser cache.
+If it looks like a hand was skipped it was probably a natural. Check the console.
 
 ##Attribution
 Three.js is used under the MIT License
