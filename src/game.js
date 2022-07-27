@@ -20,7 +20,7 @@ var Game = {
     table: globalThis,
     
     // indicates that it is time to shuffle the shoe before the next hand when the marker card is reached during a round
-    shuffle_flag: true,
+    shuffle_flag: false,
 
     //indicates that the game has been won by someone
     game_over: false,
@@ -71,6 +71,7 @@ var Game = {
 	    //this.print_hand(this.dealer);
 	    //if dealer shows 10 J Q K A, peek dealer for natural, if not show, remain blind
 	    console.log('done with deal');
+	    this.table.transform(1000);
 	    if ([10,'J','Q','K','A'].includes(cards[this.dealer.hand[0]].value)){
 		if (this.dealer.check_score()==21) {
 		    //should flip the card over
@@ -82,6 +83,7 @@ var Game = {
 			this.player.tie();
 			this.dealer.tie();		    
 			console.log('both had naturals');
+			this.table.transform(1000);
 			this.game_state='deal';
 			return;
 		    } else {
@@ -97,6 +99,7 @@ var Game = {
 			}
 			console.log('dealer natural, win');
 			this.game_state='deal';
+			this.table.transform(1000);
 			return;
 		    }
 		} else{
@@ -106,6 +109,7 @@ var Game = {
 			if (this.dealer.lost) {this.dealer=null; this.game_over=true; console.log('player beat house with a natural'); this.table.end_game(this.player); return;}
 			console.log('player wins hand with natural');
 			this.game_state='deal';
+			this.table.transform(1000);
 			return;
 		    }
 		    console.log('dealer showed but no natural');
@@ -120,6 +124,7 @@ var Game = {
 		    if (this.dealer.lost) {this.dealer=null; this.game_over=true; console.log('player beat house with a natural'); this.table.end_game(this.player); return;}
 		    console.log('player wins hand with natural');
 		    this.game_state='deal';
+		    this.table.transform(1000);
     		    return;
 		}
 		
@@ -153,11 +158,13 @@ var Game = {
 		    if (this.player.lost) {this.player=null; this.game_over=true; console.log('player lost'); return;}
 		    console.log('player busted');
 		    this.game_state='deal';
+		    this.table.transform(1000);
 		    return;
 		} else {
 		    //the player has hit and not busted
 		    this.game_state='player_turn';
 		    console.log('player successfully hit');
+		    this.table.transform(1000);
 		    return;
 		}
 	    } else if (invoker=='STAND') {
@@ -171,7 +178,7 @@ var Game = {
 		while (this.dealer.check_score()<stood_score && this.dealer.check_score()<17) { //dealer hits if under 17  //IMPLEMENTATION DETAIL: Dealer does not hit on soft 17.
 		    this.shoe.deal(this.dealer);
 		    this.print_hand(this.player);
-		    //this.print_hand(this.dealer);
+		    this.table.transform(1000);
 		    if (this.dealer.check_score()>21) { //dealer busts, finish payouts for everyone
 			//HARDCODED
 			this.dealer.lose(this.player.win('dealer_bust'));
@@ -183,6 +190,7 @@ var Game = {
 			}
 			console.log('dealer bust');
 			this.game_state='deal';
+			this.table.transform(1000);
 			return;
 		    } else { //dealer has successfully hit. check if beaten player1 only
 			let dealer_score=this.dealer.check_score();
@@ -193,12 +201,14 @@ var Game = {
 				if (this.player.lost) {this.player=null; this.game_over=true; console.log('player lost game on score'); return;}
 				console.log('player lost on score');
 				this.game_state='deal';
+				this.table.transform(1000);
 				return;
 			    } else { //tie
 				this.player.tie();
 				this.dealer.tie();
 				console.log('round ended in score tie')
 				this.game_state='deal';
+				this.table.transform(1000);
 				return;
 			    }
 			}
@@ -213,6 +223,7 @@ var Game = {
 		if (this.dealer.lost) {this.dealer=null; this.game_over=true; console.log('house lost on score'); return;}
 		console.log('player won on score');
 		this.game_state='deal';
+		this.table.transform(1000);
 		return;
 	    } else {
 		//invoker is null, but game_state is player_turn. something is wrong.

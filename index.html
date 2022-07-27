@@ -36,6 +36,7 @@
       
       var root_dir = 'http://localhost:8080/';
       Game.table = this;
+      Game.shoe.game=Game;
       var camera, scene, renderer, controls;
       var cards = Game.shoe.cards;
       //card_objs will give a simple index into the card CSS objects by their shoe ID
@@ -45,30 +46,32 @@
       var target_list = ['DEALER_1', 'DEALER_2', 'DEALER_3', 'DEALER_4', 'DEALER_5', 'DEALER_6', 'PLAYER1_1', 'PLAYER1_2', 'PLAYER1_3', 'PLAYER1_4', 'PLAYER1_5', 'PLAYER1_6', 'SHOE', 'DISCARD', 'MARKER'];
       //targets is a dict of THREE.CSS3DObject, keyed by the capital names above
       var targets = {};
+      //animation queue holds cards that need to me moved in the next update
+      var animation_queue=[];
 
       var single_player_layout = {
           // column x row (x then y coord)
 	  DEALER_1: [1,1],
 	  DEALER_2: [2,1],
-	  DEALER_3: [1,1.5],
-	  DEALER_4: [2,1.5],
-	  DEALER_5: [1,2],
-	  DEALER_6: [2,2],
-	  PLAYER1_1: [3,4],
-	  PLAYER1_2: [4,4],
-	  PLAYER1_3: [3,4.5],
-	  PLAYER1_4: [4,4.5],
-	  PLAYER1_5: [3,5],
-	  PLAYER1_6: [4,5],
-	  SHOE: [5,1],
-	  DISCARD: [6,1],
-	  MARKER: [5,0]
+	  DEALER_3: [3,1],
+	  DEALER_4: [4,1],
+	  DEALER_5: [5,1],
+	  DEALER_6: [6,1],
+	  PLAYER1_1: [1,3],
+	  PLAYER1_2: [2,3],
+	  PLAYER1_3: [3,3],
+	  PLAYER1_4: [4,3],
+	  PLAYER1_5: [5,3],
+	  PLAYER1_6: [6,3],
+	  SHOE: [7,2],
+	  DISCARD: [6,2],
+	  MARKER: [8,2]
       };
       
       //set up tween targets for card animations
       //single player
       for (const t of target_list) {
-	  var move_target = new THREE.CSS3DObject();
+	  var move_target = new THREE.Object3D();
 	  move_target.position.x = (140 * single_player_layout[t][0]-800);
 	  move_target.position.y = -(175 * single_player_layout[t][1])+650;
 	  move_target.position.z = 0;
@@ -209,23 +212,29 @@
 	  window.close();
       }
       
-      function transform(card, target_name,duration=1000 ) {
+      function transform(duration=1000) {
 	  TWEEN.removeAll();
 
-	  let temp_targ=targets[target_name].position.x;
+	  for (const card of this.animation_queue){
         
-          new TWEEN.Tween( card.doc_element.position )
-	  .to( { x: targets[target_name].position.x, y: targets[target_name].position.y, z: targets[target_name].position.z }, Math.random() * duration + duration )
-          .easing( TWEEN.Easing.Exponential.InOut )
-          .start();
-          new TWEEN.Tween( card.doc_element.rotation )
-          .to( { x: targets[card.new_position].rotation.x, y: targets[card.new_position].rotation.y, z: targets[card.new_position].rotation.z }, Math.random() * duration + duration )
-          .easing( TWEEN.Easing.Exponential.InOut )
-          .start();
-          new TWEEN.Tween( this )
-          .to( {}, duration * 3 )
-          .onUpdate( render )
-          .start();
+              new TWEEN.Tween( card.doc_element.position )
+		  .to( { x: targets[card.new_position].position.x, y: targets[card.new_position].position.y, z: targets[card.new_position].position.z }, Math.random() * duration + duration )
+		  .easing( TWEEN.Easing.Exponential.InOut )
+		  .start();
+              new TWEEN.Tween( card.doc_element.rotation )
+		  .to( { x: targets[card.new_position].rotation.x, y: targets[card.new_position].rotation.y, z: targets[card.new_position].rotation.z }, Math.random() * duration + duration )
+		  .easing( TWEEN.Easing.Exponential.InOut )
+		  .start();
+	  }
+	  
+	  this.animation_queue=[];
+
+	  new TWEEN.Tween( this )
+              .to( {}, duration * 3 )
+              .onUpdate( render )
+              .start();
+
+	  
       }
       
       function hover( obj,scalex ){

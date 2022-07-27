@@ -28,7 +28,7 @@ class Card {
 	}
 	this.face_up=false;
 	this.new_position='SHOE';
-	this.table.transform(this,this.new_position,1000);
+	this.table.animation_queue.push(this);
 	this.play_position='SHOE';
     }
 
@@ -41,7 +41,7 @@ class Card {
 	this.shoe.discards.push(this.index);
 	this.new_position='DISCARD';
 	this.play_position='DISCARD';
-	this.table.transform(this,this.new_position,1000);
+	this.table.animation_queue.push(this);
     }
 
     dealt(plyr){
@@ -59,7 +59,7 @@ class Card {
 	}
 	this.new_position=plyr.name+"_"+deal_index;
 	this.play_position=this.new_position;
-	this.table.transform(this,this.new_position,1000);
+	this.table.animation_queue.push(this);
     }
 
     flip(){
